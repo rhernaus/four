@@ -818,6 +818,44 @@ footer {
     opacity: 0.6;
 }
 
+/* SEO Footer Section */
+.seo-footer {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    text-align: left;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    color: var(--dark);
+    opacity: 0.7;
+}
+
+.seo-footer h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+    text-align: left;
+}
+
+.seo-footer p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+/* Style for dark theme */
+[data-theme="dark"] .seo-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Hide SEO content visually but keep it available for search engines on mobile */
+@media (max-width: 768px) {
+    .seo-footer {
+        font-size: 0.8rem;
+    }
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;

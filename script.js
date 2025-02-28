@@ -663,9 +663,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (pathParts.length >= 2 && Object.keys(languageData).includes(pathParts[0])) {
                 lang = pathParts[0];
                 word = decodeURIComponent(pathParts[1]);
+                
+                // Update canonical and meta tags for SEO
+                updateMetaTags(lang, word);
             } else {
                 // Single part - just the word
                 word = decodeURIComponent(pathParts[0]);
+                
+                // Update canonical and meta tags for SEO
+                updateMetaTags('en', word);
             }
             
             // Set language
@@ -698,6 +704,77 @@ document.addEventListener('DOMContentLoaded', () => {
             // Process the word
             checkWord();
         }
+    }
+    
+    // Update meta tags for SEO when navigating to a specific word
+    function updateMetaTags(lang, word) {
+        const data = languageData[lang];
+        const magicNumber = data.magicNumber;
+        const pathLength = getPathLength(word);
+        const baseUrl = window.location.origin;
+        
+        // Construct proper canonical URL
+        let canonicalUrl;
+        if (lang === 'en') {
+            canonicalUrl = `${baseUrl}/${encodeURIComponent(word)}`;
+        } else {
+            canonicalUrl = `${baseUrl}/${lang}/${encodeURIComponent(word)}`;
+        }
+        
+        // Update canonical link
+        let canonicalLink = document.querySelector('link[rel="canonical"]');
+        if (canonicalLink) {
+            canonicalLink.setAttribute('href', canonicalUrl);
+        }
+        
+        // Update meta description
+        let description;
+        if (lang === 'en') {
+            description = `The word "${word}" leads to ${magicNumber} in ${pathLength} steps. Every word eventually leads to four through a simple counting algorithm. Try it yourself!`;
+        } else if (lang === 'nl') {
+            description = `Het woord "${word}" leidt tot ${magicNumber} in ${pathLength} stappen. Elk woord leidt uiteindelijk naar vier via een eenvoudig telalgoritme. Probeer het zelf!`;
+        } else if (lang === 'de') {
+            description = `Das Wort "${word}" führt zu ${magicNumber} in ${pathLength} Schritten. Jedes Wort führt schließlich zu vier durch einen einfachen Zählalgorithmus. Probieren Sie es selbst!`;
+        }
+        
+        // Update meta tags
+        let metaDescription = document.querySelector('meta[name="description"]');
+        if (metaDescription) {
+            metaDescription.setAttribute('content', description);
+        }
+        
+        // Update Open Graph tags
+        let ogTitle = document.querySelector('meta[property="og:title"]');
+        let ogDescription = document.querySelector('meta[property="og:description"]');
+        let ogUrl = document.querySelector('meta[property="og:url"]');
+        
+        if (ogTitle) {
+            ogTitle.setAttribute('content', `${word} → ${magicNumber} | Everything is Four`);
+        }
+        if (ogDescription) {
+            ogDescription.setAttribute('content', description);
+        }
+        if (ogUrl) {
+            ogUrl.setAttribute('content', canonicalUrl);
+        }
+        
+        // Update Twitter tags
+        let twitterTitle = document.querySelector('meta[name="twitter:title"]');
+        let twitterDescription = document.querySelector('meta[name="twitter:description"]');
+        let twitterUrl = document.querySelector('meta[name="twitter:url"]');
+        
+        if (twitterTitle) {
+            twitterTitle.setAttribute('content', `${word} → ${magicNumber} | Everything is Four`);
+        }
+        if (twitterDescription) {
+            twitterDescription.setAttribute('content', description);
+        }
+        if (twitterUrl) {
+            twitterUrl.setAttribute('content', canonicalUrl);
+        }
+        
+        // Update page title
+        document.title = `${word} → ${magicNumber} | Everything is Four`;
     }
     
     // checkUrlParameters is called above in the main initialization

@@ -28,11 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
             'programmierung', 'mathematik', 'software', 'computer', 'tastatur',
             'sprache', 'universum', 'wissenschaft', 'wissen', 'lernen',
             'technologie', 'algorithmus', 'ingenieurwesen', 'entwicklung', 'innovation'
-        ],
-        'it': [
-            'programmazione', 'matematica', 'software', 'computer', 'tastiera',
-            'linguaggio', 'universo', 'scienza', 'conoscenza', 'apprendimento',
-            'tecnologia', 'algoritmo', 'ingegneria', 'sviluppo', 'innovazione'
         ]
     };
     
@@ -121,34 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 'step4': 'Wiederholen Sie die Schritte 2-3, bis Sie "vier" erreichen',
                 'example': '', // Will be generated dynamically
                 'footer': 'Erstellt mit 💻 und Neugier'
-            }
-        },
-        'it': {
-            'name': 'Italiano',
-            'numberWords': {
-                0: 'zero', 1: 'uno', 2: 'due', 3: 'tre', 4: 'quattro', 5: 'cinque',
-                6: 'sei', 7: 'sette', 8: 'otto', 9: 'nove', 10: 'dieci',
-                11: 'undici', 12: 'dodici', 13: 'tredici', 14: 'quattordici',
-                15: 'quindici', 16: 'sedici', 17: 'diciassette', 18: 'diciotto',
-                19: 'diciannove', 20: 'venti', 30: 'trenta', 40: 'quaranta',
-                50: 'cinquanta', 60: 'sessanta', 70: 'settanta', 80: 'ottanta',
-                90: 'novanta', 100: 'cento'
-            },
-            'magicNumber': 'otto', // 4 letters
-            'magicNumberValue': 4,
-            'ui': {
-                'title': 'Tutto è',
-                'tagline': 'Ogni parola porta infine a otto. Provalo tu stesso!',
-                'inputPlaceholder': 'Inserisci una parola...',
-                'checkButton': 'Verifica',
-                'conclusion': 'Ogni parola porta infine a OTTO!',
-                'howItWorks': 'Come funziona',
-                'step1': 'Inizia con una parola qualsiasi',
-                'step2': 'Conta il numero di lettere nella parola',
-                'step3': 'Scrivi quel numero come parola',
-                'step4': 'Ripeti i passaggi 2-3 fino a raggiungere "otto"',
-                'example': '', // Will be generated dynamically
-                'footer': 'Creato con 💻 e curiosità'
             }
         }
     };
@@ -887,8 +854,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const langMap = {
                 'en': 'en-US',
                 'nl': 'nl-NL',
-                'de': 'de-DE',
-                'it': 'it-IT'
+                'de': 'de-DE'
             };
             return langMap[lang] || 'en-US';
         }

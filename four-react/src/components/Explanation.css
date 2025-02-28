@@ -22,44 +22,93 @@ h2 {
   min-width: 200px;
   background-color: var(--gray);
   padding: 1.5rem;
-  border-radius: 0.5rem;
+  border-radius: 1rem;
   text-align: center;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
   transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 1;
+}
+
+.step::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  background: linear-gradient(to bottom, rgba(93, 59, 232, 0.1), transparent);
+  transition: height 0.3s ease;
+  z-index: -1;
 }
 
 .step:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px rgba(93, 59, 232, 0.15);
+}
+
+.step:hover::before {
+  height: 100%;
 }
 
 .step-number {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  background-color: var(--primary);
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
   color: white;
   border-radius: 50%;
   margin: 0 auto 1rem;
-  font-weight: 600;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(93, 59, 232, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  font-size: 1.2rem;
+  position: relative;
+  z-index: 2;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.step:hover .step-number {
+  transform: scale(1.1);
+  box-shadow: 0 6px 15px rgba(93, 59, 232, 0.3);
 }
 
 .example {
   background-color: var(--gray);
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  margin-top: 2rem;
+  padding: 1.8rem;
+  border-radius: 1rem;
+  margin-top: 2.5rem;
   line-height: 1.8;
   transition: var(--transition);
   cursor: pointer;
+  position: relative;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.example::before {
+  content: '✨';
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  font-size: 1rem;
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
 }
 
 .example:hover {
   background-color: rgba(93, 59, 232, 0.05);
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 25px rgba(93, 59, 232, 0.15);
+}
+
+.example:hover::before {
+  opacity: 0.7;
 }
 
 .example.refreshed {
@@ -75,11 +124,36 @@ h2 {
 .example .word {
   color: var(--primary);
   font-weight: 600;
+  padding: 0 2px;
+  position: relative;
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.example .word:hover {
+  transform: scale(1.1);
+}
+
+.example .word::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.example .word:hover::after {
+  transform: scaleX(1);
 }
 
 .highlight {
   color: var(--primary) !important;
-  font-weight: 600;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(93, 59, 232, 0.3);
 }
 
 @media screen and (max-width: 768px) {

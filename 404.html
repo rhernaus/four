@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecting...</title>
+    <script>
+        // Get the current path (everything after the domain)
+        const pathname = window.location.pathname;
+        const pathParts = pathname.split('/').filter(part => part !== '');
+        
+        // Base URL (GitHub Pages)
+        const baseUrl = window.location.origin;
+        
+        // Handle redirects for language/word paths
+        if (pathParts.length >= 1) {
+            // Check if the first part is a valid language code
+            const validLangs = ['en', 'nl', 'de'];
+            let redirectUrl = baseUrl;
+            
+            if (pathParts.length >= 2 && validLangs.includes(pathParts[0])) {
+                // Format: /lang/word
+                const lang = pathParts[0];
+                const word = pathParts[1];
+                redirectUrl = `${baseUrl}?lang=${lang}&word=${encodeURIComponent(word)}`;
+            } else if (pathParts.length >= 1) {
+                // Format: /word
+                const word = pathParts[0];
+                redirectUrl = `${baseUrl}?word=${encodeURIComponent(word)}`;
+            }
+            
+            // Redirect to the correct URL with query parameters
+            window.location.replace(redirectUrl);
+        } else {
+            // If no path parts, redirect to home
+            window.location.replace(baseUrl);
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f8f9fa;
+            color: #333;
+            text-align: center;
+        }
+        
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .container {
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="loader"></div>
+        <h2>Redirecting...</h2>
+        <p>If you are not redirected automatically, <a href="/">click here</a>.</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,20 @@
+# Enable URL rewriting
+RewriteEngine On
+
+# Set the base
+RewriteBase /
+
+# Ensure direct access to actual files still works
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Handle language-specific URLs in the format: /nl/programming
+RewriteRule ^(nl|de|en)/([^/]+)$ index.html [L]
+
+# Handle default language (English) URLs in the format: /programming
+RewriteRule ^([^/]+)$ index.html [L]
+
+# Prevent infinite loops (optional, but useful)
+RewriteCond %{THE_REQUEST} /index\.html [NC]
+RewriteRule ^index\.html$ / [R=301,L]

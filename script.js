@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 'tagline': 'Elk woord leidt uiteindelijk tot vier. Probeer het zelf!',
                 'inputPlaceholder': 'Voer een woord in...',
                 'checkButton': 'Controleer',
+                'suggestButton': 'Stel een woord voor',
                 'conclusion': 'Elk woord leidt uiteindelijk tot VIER!',
                 'howItWorks': 'Hoe het werkt',
                 'step1': 'Begin met een willekeurig woord',
@@ -59,7 +60,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 'step3': 'Schrijf dat nummer uit als een woord',
                 'step4': 'Herhaal stappen 2-3 totdat je "vier" bereikt',
                 'example': '', // Will be generated dynamically
-                'footer': 'Gemaakt met 💻 en nieuwsgierigheid'
+                'footer': 'Gemaakt met 💻 en nieuwsgierigheid',
+                'shareButton': 'Delen',
+                'shareDialogTitle': 'Deel deze ontdekking',
+                'shareDialogText': 'Deel deze link met anderen:',
+                'copyButton': 'Kopiëren',
+                'copiedMessage': 'Gekopieerd naar klembord!'
             }
         },
         'en': {
@@ -80,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 'tagline': 'Every word eventually leads to four. Try it yourself!',
                 'inputPlaceholder': 'Enter any word...',
                 'checkButton': 'Check',
+                'suggestButton': 'Suggest a Word',
                 'conclusion': 'Every word eventually leads to FOUR!',
                 'howItWorks': 'How it works',
                 'step1': 'Start with any word',
@@ -87,7 +94,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 'step3': 'Write out that number as a word',
                 'step4': 'Repeat steps 2-3 until you reach "four"',
                 'example': '', // Will be generated dynamically
-                'footer': 'Created with 💻 and curiosity'
+                'footer': 'Created with 💻 and curiosity',
+                'shareButton': 'Share',
+                'shareDialogTitle': 'Share this discovery',
+                'shareDialogText': 'Share this link with others:',
+                'copyButton': 'Copy',
+                'copiedMessage': 'Copied to clipboard!'
             }
         },
         'de': {
@@ -108,6 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 'tagline': 'Jedes Wort führt schließlich zu vier. Probieren Sie es selbst!',
                 'inputPlaceholder': 'Geben Sie ein Wort ein...',
                 'checkButton': 'Prüfen',
+                'suggestButton': 'Wort vorschlagen',
                 'conclusion': 'Jedes Wort führt schließlich zu VIER!',
                 'howItWorks': 'Wie es funktioniert',
                 'step1': 'Beginnen Sie mit einem beliebigen Wort',
@@ -115,7 +128,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 'step3': 'Schreiben Sie diese Zahl als Wort aus',
                 'step4': 'Wiederholen Sie die Schritte 2-3, bis Sie "vier" erreichen',
                 'example': '', // Will be generated dynamically
-                'footer': 'Erstellt mit 💻 und Neugier'
+                'footer': 'Erstellt mit 💻 und Neugier',
+                'shareButton': 'Teilen',
+                'shareDialogTitle': 'Diese Entdeckung teilen',
+                'shareDialogText': 'Teilen Sie diesen Link mit anderen:',
+                'copyButton': 'Kopieren',
+                'copiedMessage': 'In die Zwischenablage kopiert!'
             }
         }
     };
@@ -242,7 +260,20 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('tagline').textContent = data.ui.tagline;
         wordInput.placeholder = data.ui.inputPlaceholder;
         checkButton.textContent = data.ui.checkButton;
-        document.getElementById('conclusion-text').innerHTML = data.ui.conclusion.replace('FOUR', `<span class="highlight">${data.magicNumber.toUpperCase()}</span>`);
+        document.getElementById('suggestButton').textContent = data.ui.suggestButton;
+        // Update shareButton while preserving the SVG icon
+        const shareButton = document.getElementById('shareButton');
+        shareButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                <polyline points="16 6 12 2 8 6"></polyline>
+                <line x1="12" y1="2" x2="12" y2="15"></line>
+            </svg>
+            ${data.ui.shareButton}
+        `;
+        // Replace the uppercase magic number (FOUR/VIER) with a highlighted span
+        const uppercaseMagic = data.magicNumber.toUpperCase();
+        document.getElementById('conclusion-text').innerHTML = data.ui.conclusion.replace(uppercaseMagic, `<span class="highlight">${uppercaseMagic}</span>`);
         document.getElementById('how-it-works').textContent = data.ui.howItWorks;
         document.getElementById('step1').textContent = data.ui.step1;
         document.getElementById('step2').textContent = data.ui.step2;
@@ -258,6 +289,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Clear any previous results
         pathContainer.innerHTML = '';
         conclusion.classList.add('hidden');
+        
+        // Update share dialog texts
+        document.querySelector('.share-dialog-header h3').textContent = data.ui.shareDialogTitle;
+        document.querySelector('.share-dialog-body p').textContent = data.ui.shareDialogText;
+        document.getElementById('copyShareUrl').textContent = data.ui.copyButton;
+        document.getElementById('copySuccess').querySelector('span').textContent = data.ui.copiedMessage;
     }
     
     function convertNumberToWord(num) {
@@ -464,10 +501,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set up all the new features
     setupNewFeatures();
     
+    // Check URL parameters for word and language
+    checkUrlParameters();
+    
     // Focus input on page load
     wordInput.focus();
     
-    // Setup all new features
+    // Function to set up new features
     function setupNewFeatures() {
         // 1. Word Suggestions
         const suggestButton = document.getElementById('suggestButton');
@@ -476,31 +516,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. Social Sharing
         const shareButton = document.getElementById('shareButton');
         shareButton.addEventListener('click', shareResult);
-        
-        // 3. Export as Image
-        const saveImageButton = document.getElementById('saveImageButton');
-        saveImageButton.addEventListener('click', saveAsImage);
-        
-        // 4. Word History
-        setupWordHistory();
-        
-        // 5. Statistics Dashboard
-        setupStatsDashboard();
-        
-        // 6. Community Words
-        setupCommunitySection();
-        
-        // 7. Daily Challenge
-        setupDailyChallenge();
-        
-        // 8. Path Optimizer
-        setupPathOptimizer();
-        
-        // 9. Audio Pronunciation
-        setupAudioPlayer();
-        
-        // 10. Navigation Tabs
-        setupNavigationTabs();
     }
     
     // Word suggestion feature
@@ -519,28 +534,102 @@ document.addEventListener('DOMContentLoaded', () => {
         // Create share text
         const lang = languageData[currentLanguage];
         const magicNumber = lang.magicNumber;
-        const shareText = `I discovered that "${word}" leads to "${magicNumber}" in ${getPathLength(word)} steps! Try it yourself:`;
         
-        // Create URL with the word as a parameter
-        const shareUrl = `${window.location.origin}${window.location.pathname}?word=${encodeURIComponent(word)}&lang=${currentLanguage}`;
+        // Localized share text based on current language
+        let shareText;
+        if (currentLanguage === 'nl') {
+            shareText = `Ik heb ontdekt dat "${word}" leidt tot "${magicNumber}" in ${getPathLength(word)} stappen! Probeer het zelf:`;
+        } else if (currentLanguage === 'de') {
+            shareText = `Ich habe entdeckt, dass "${word}" zu "${magicNumber}" in ${getPathLength(word)} Schritten führt! Probieren Sie es selbst:`;
+        } else {
+            shareText = `I discovered that "${word}" leads to "${magicNumber}" in ${getPathLength(word)} steps! Try it yourself:`;
+        }
         
-        // Try to use Web Share API if available
-        if (navigator.share) {
+        // Create clean URL structure: website.com/nl/longword 
+        let basePath = window.location.origin;
+        
+        // If currentLanguage is English (default), don't include language in the path
+        let shareUrl;
+        if (currentLanguage === 'en') {
+            shareUrl = `${basePath}/${encodeURIComponent(word)}`;
+        } else {
+            shareUrl = `${basePath}/${currentLanguage}/${encodeURIComponent(word)}`;
+        }
+        
+        // Use custom share dialog on desktop, Web Share API on mobile
+        if (navigator.share && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            // Mobile device with Web Share API
             navigator.share({
-                title: 'Everything is Four',
+                title: currentLanguage === 'de' ? 'Alles ist Vier' : 
+                       currentLanguage === 'nl' ? 'Alles is Vier' : 
+                       'Everything is Four',
                 text: shareText,
                 url: shareUrl
             })
             .catch(error => {
-                // Fallback to clipboard
-                copyToClipboard(`${shareText} ${shareUrl}`);
-                alert('Share text copied to clipboard!');
+                showShareDialog(shareText, shareUrl);
             });
         } else {
-            // Fallback to clipboard
-            copyToClipboard(`${shareText} ${shareUrl}`);
-            alert('Share text copied to clipboard!');
+            // Desktop - show custom dialog
+            showShareDialog(shareText, shareUrl);
         }
+    }
+    
+    // Show custom share dialog
+    function showShareDialog(shareText, shareUrl) {
+        const shareDialog = document.getElementById('shareDialog');
+        const shareUrlInput = document.getElementById('shareUrl');
+        const closeShareDialog = document.getElementById('closeShareDialog');
+        const copyShareUrl = document.getElementById('copyShareUrl');
+        const copySuccess = document.getElementById('copySuccess');
+        
+        // Set the URL in the input field
+        shareUrlInput.value = shareUrl;
+        
+        // Show the dialog
+        shareDialog.classList.add('active');
+        shareDialog.classList.remove('hidden');
+        
+        // Handle copy button
+        copyShareUrl.onclick = function() {
+            shareUrlInput.select();
+            document.execCommand('copy');
+            copySuccess.classList.remove('hidden');
+            setTimeout(() => {
+                copySuccess.classList.add('hidden');
+            }, 3000);
+        };
+        
+        // Handle close button
+        closeShareDialog.onclick = function() {
+            shareDialog.classList.remove('active');
+            setTimeout(() => {
+                shareDialog.classList.add('hidden');
+            }, 300);
+        };
+        
+        // Handle social platform buttons
+        document.getElementById('shareTwitter').onclick = function() {
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
+        };
+        
+        document.getElementById('shareFacebook').onclick = function() {
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank');
+        };
+        
+        document.getElementById('shareEmail').onclick = function() {
+            window.location.href = `mailto:?subject=Everything is Four&body=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
+        };
+        
+        // Close on background click
+        shareDialog.onclick = function(event) {
+            if (event.target === shareDialog) {
+                shareDialog.classList.remove('active');
+                setTimeout(() => {
+                    shareDialog.classList.add('hidden');
+                }, 300);
+            }
+        };
     }
     
     // Helper to copy text to clipboard
@@ -553,109 +642,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.removeChild(textArea);
     }
     
-    // Export as image feature
-    function saveAsImage() {
-        // Use html2canvas or a similar library to capture the result
-        // For demonstration, we'll just show an alert
-        alert('Image saving would be implemented with html2canvas library');
-        
-        // Actual implementation would look like:
-        /*
-        html2canvas(document.querySelector("#results")).then(canvas => {
-            const imgData = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.download = 'four-path.png';
-            link.href = imgData;
-            link.click();
-        });
-        */
-    }
-    
-    // Word history feature
-    function setupWordHistory() {
-        const historyContainer = document.getElementById('historyContainer');
-        
-        // Load history from localStorage
-        const history = getWordHistory();
-        
-        // Display history items
-        updateHistoryDisplay();
-        
-        function updateHistoryDisplay() {
-            historyContainer.innerHTML = '';
-            const history = getWordHistory();
-            
-            if (history.length === 0) {
-                historyContainer.innerHTML = '<p>No words tried yet. Start exploring!</p>';
-                return;
-            }
-            
-            history.forEach(item => {
-                const historyItem = document.createElement('div');
-                historyItem.className = 'history-item';
-                historyItem.innerHTML = `
-                    <div class="history-word">${item.word}</div>
-                    <div class="history-steps">${item.steps} steps</div>
-                `;
-                historyItem.addEventListener('click', () => {
-                    wordInput.value = item.word;
-                    checkWord();
-                });
-                historyContainer.appendChild(historyItem);
-            });
-        }
-        
-        // Add current word to history after checking
-        const originalCheckWord = checkWord;
-        checkWord = function() {
-            originalCheckWord();
-            const word = wordInput.value.trim();
-            if (word) {
-                addToHistory(word, getPathLength(word));
-                updateHistoryDisplay();
-                updateStatsDashboard();
-            }
-        };
-    }
-    
-    // Get word history from localStorage
-    function getWordHistory() {
-        const historyStr = localStorage.getItem('fourHistory');
-        return historyStr ? JSON.parse(historyStr) : [];
-    }
-    
-    // Add a word to history
-    function addToHistory(word, steps) {
-        const history = getWordHistory();
-        
-        // Check if word already exists in history
-        const existingIndex = history.findIndex(item => item.word === word);
-        if (existingIndex !== -1) {
-            // Update existing entry
-            history[existingIndex].steps = steps;
-            history[existingIndex].lastUsed = Date.now();
-        } else {
-            // Add new entry
-            history.push({
-                word,
-                steps,
-                language: currentLanguage,
-                lastUsed: Date.now()
-            });
-        }
-        
-        // Sort by last used
-        history.sort((a, b) => b.lastUsed - a.lastUsed);
-        
-        // Limit history size
-        const limitedHistory = history.slice(0, 20);
-        
-        // Save back to localStorage
-        localStorage.setItem('fourHistory', JSON.stringify(limitedHistory));
-        
-        return limitedHistory;
-    }
-    
     // Get path length for a word
     function getPathLength(word) {
         const path = calculatePath(word);
@@ -663,222 +649,39 @@ document.addEventListener('DOMContentLoaded', () => {
         return Math.floor(path.length / 2);
     }
     
-    // Statistics dashboard feature
-    function setupStatsDashboard() {
-        updateStatsDashboard();
-    }
-    
-    function updateStatsDashboard() {
-        const totalWordsElement = document.getElementById('totalWords');
-        const avgStepsElement = document.getElementById('avgSteps');
-        const longestPathElement = document.getElementById('longestPath');
+    // Check URL structure and extract parameters
+    function checkUrlParameters() {
+        // First, check if we're using the new URL format
+        const pathname = window.location.pathname;
+        const pathParts = pathname.split('/').filter(part => part !== '');
         
-        const history = getWordHistory();
-        
-        // Calculate stats
-        const totalWords = history.length;
-        
-        let totalSteps = 0;
-        let maxSteps = 0;
-        
-        history.forEach(item => {
-            totalSteps += item.steps;
-            if (item.steps > maxSteps) {
-                maxSteps = item.steps;
+        if (pathParts.length >= 1) {
+            let lang = 'en';  // Default language
+            let word = '';
+            
+            // Check if the first part is a language code
+            if (pathParts.length >= 2 && Object.keys(languageData).includes(pathParts[0])) {
+                lang = pathParts[0];
+                word = decodeURIComponent(pathParts[1]);
+            } else {
+                // Single part - just the word
+                word = decodeURIComponent(pathParts[0]);
             }
-        });
-        
-        const avgSteps = totalWords > 0 ? (totalSteps / totalWords).toFixed(1) : 0;
-        
-        // Update the display
-        totalWordsElement.textContent = totalWords;
-        avgStepsElement.textContent = avgSteps;
-        longestPathElement.textContent = maxSteps;
-    }
-    
-    // Community section feature
-    function setupCommunitySection() {
-        // For demonstration purposes, we'll use mock data
-        // In a real app, this would come from a server
-        const wordCloud = document.getElementById('wordCloud');
-        const interestingPaths = document.getElementById('interestingPaths');
-        
-        // Mock popular words
-        const popularWords = [
-            'programming', 'supercalifragilisticexpialidocious', 'hippopotamus', 
-            'extraordinary', 'magnificent', 'constantinople', 'antidisestablishmentarianism',
-            'philosophy', 'mathematics', 'interstellar'
-        ];
-        
-        popularWords.forEach(word => {
-            const cloudWord = document.createElement('div');
-            cloudWord.className = 'cloud-word';
-            cloudWord.textContent = word;
-            cloudWord.addEventListener('click', () => {
+            
+            // Set language
+            if (languageData[lang]) {
+                setLanguage(lang);
+            }
+            
+            // Set and check word
+            if (word) {
                 wordInput.value = word;
                 checkWord();
-                
-                // Show main tab
-                showTab('main');
-            });
-            wordCloud.appendChild(cloudWord);
-        });
-        
-        // Mock interesting paths
-        const paths = [
-            { word: 'hippopotamus', steps: 6, path: 'hippopotamus → eleven → six → three → five → four → four' },
-            { word: 'extraordinary', steps: 5, path: 'extraordinary → twelve → six → three → five → four' },
-            { word: 'programming', steps: 5, path: 'programming → eleven → six → three → five → four' }
-        ];
-        
-        paths.forEach(item => {
-            const pathItem = document.createElement('div');
-            pathItem.className = 'path-item';
-            pathItem.innerHTML = `
-                <div class="path-word">${item.word}</div>
-                <div class="path-steps">${item.steps} steps</div>
-                <div class="path-full">${item.path}</div>
-            `;
-            pathItem.addEventListener('click', () => {
-                wordInput.value = item.word;
-                checkWord();
-                
-                // Show main tab
-                showTab('main');
-            });
-            interestingPaths.appendChild(pathItem);
-        });
-    }
-    
-    // Daily challenge feature
-    function setupDailyChallenge() {
-        const challengeWord = document.getElementById('challengeWord');
-        const solveChallenge = document.getElementById('solveChallenge');
-        
-        // Generate today's challenge word 
-        // In a real app, this would be the same for all users on the same day
-        const todayWords = [
-            'unprecedented', 'serendipity', 'conscientious', 'extraordinary',
-            'simultaneously', 'onomatopoeia', 'incomprehensible', 'exponential'
-        ];
-        
-        // Use the current date to select a challenge word (same word each day)
-        const today = new Date();
-        const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
-        const todayWord = todayWords[dayOfYear % todayWords.length];
-        
-        challengeWord.textContent = todayWord;
-        
-        solveChallenge.addEventListener('click', () => {
-            wordInput.value = todayWord;
-            checkWord();
-            
-            // Show main tab
-            showTab('main');
-        });
-    }
-    
-    // Path optimizer feature
-    function setupPathOptimizer() {
-        const optimizerInput = document.getElementById('optimizerInput');
-        const optimizeButton = document.getElementById('optimizeButton');
-        const optimizerResults = document.getElementById('optimizerResults');
-        
-        optimizeButton.addEventListener('click', () => {
-            const word = optimizerInput.value.trim();
-            if (!word) return;
-            
-            // For now, we'll just display the regular path
-            // In a real optimizer, you might try different counting methods
-            const path = calculatePath(word);
-            
-            const stepsCount = Math.floor(path.length / 2);
-            
-            optimizerResults.innerHTML = `
-                <div class="optimizer-result">
-                    <h3>Standard Path (${stepsCount} steps)</h3>
-                    <div class="optimizer-path">${formatPath(path)}</div>
-                    
-                    <h3>Optimized Path</h3>
-                    <p>The standard path is already the most efficient.</p>
-                </div>
-            `;
-        });
-        
-        function formatPath(path) {
-            let result = '';
-            for (let i = 0; i < path.length; i += 2) {
-                result += `<span class="word">${path[i]}</span>`;
-                if (i < path.length - 1) {
-                    result += ` → `;
-                }
-            }
-            return result;
-        }
-    }
-    
-    // Audio pronunciation feature
-    function setupAudioPlayer() {
-        const toggleAudio = document.getElementById('toggleAudio');
-        const audioStatus = document.getElementById('audioStatus');
-        
-        let audioEnabled = false;
-        
-        toggleAudio.addEventListener('click', () => {
-            audioEnabled = !audioEnabled;
-            audioStatus.textContent = audioEnabled ? 'Disable Audio' : 'Enable Audio';
-            
-            if (audioEnabled) {
-                // Create speech synthesis for current word
-                speakCurrentWord();
-            }
-        });
-        
-        // Speak the current word when checked
-        function speakCurrentWord() {
-            if (!audioEnabled) return;
-            
-            const word = wordInput.value.trim();
-            if (!word) return;
-            
-            // Use the Web Speech API
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(word);
-                utterance.lang = getLangCode(currentLanguage);
-                window.speechSynthesis.speak(utterance);
+                return; // We've handled the URL, no need to check query params
             }
         }
         
-        // Map our language codes to speechSynthesis language codes
-        function getLangCode(lang) {
-            const langMap = {
-                'en': 'en-US',
-                'nl': 'nl-NL',
-                'de': 'de-DE'
-            };
-            return langMap[lang] || 'en-US';
-        }
-        
-        // Add speech to the check word function
-        const originalCheckWord = checkWord;
-        checkWord = function() {
-            originalCheckWord();
-            speakCurrentWord();
-        };
-    }
-    
-    // Navigation tabs feature
-    function setupNavigationTabs() {
-        const tabs = document.querySelectorAll('.nav-tab');
-        
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const tabName = tab.getAttribute('data-tab');
-                showTab(tabName);
-            });
-        });
-        
-        // Check for URL parameters
+        // Fallback: check for traditional query parameters
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('word')) {
             const word = urlParams.get('word');
@@ -895,43 +698,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Process the word
             checkWord();
         }
-        
-        // Initial state - show main tab
-        showTab('main');
     }
     
-    function showTab(tabName) {
-        // Hide all sections
-        document.getElementById('dashboard').classList.add('hidden');
-        document.getElementById('historySection').classList.add('hidden');
-        document.getElementById('communitySection').classList.add('hidden');
-        document.getElementById('dailyChallenge').classList.add('hidden');
-        document.getElementById('pathOptimizer').classList.add('hidden');
-        
-        // Show explanation section only for main tab
-        document.querySelector('.explanation').classList.toggle('hidden', tabName !== 'main');
-        document.querySelector('.demo').classList.toggle('hidden', tabName !== 'main');
-        
-        // Set active tab
-        document.querySelectorAll('.nav-tab').forEach(tab => {
-            tab.classList.toggle('active', tab.getAttribute('data-tab') === tabName);
-        });
-        
-        // Show the requested section
-        switch (tabName) {
-            case 'stats':
-                document.getElementById('dashboard').classList.remove('hidden');
-                break;
-            case 'history':
-                document.getElementById('historySection').classList.remove('hidden');
-                break;
-            case 'community':
-                document.getElementById('communitySection').classList.remove('hidden');
-                break;
-            case 'challenge':
-                document.getElementById('dailyChallenge').classList.remove('hidden');
-                document.getElementById('pathOptimizer').classList.remove('hidden');
-                break;
-        }
-    }
+    // checkUrlParameters is called above in the main initialization
 });

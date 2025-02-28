@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Everything is Four</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="top-controls">
+                <div class="language-selector">
+                    <div id="currentLanguage" class="language-button">
+                        <span id="languageDisplay">English</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                    <div class="language-dropdown" id="languageDropdown">
+                        <a href="#" data-lang="en">English</a>
+                        <a href="#" data-lang="nl">Nederlands</a>
+                        <a href="#" data-lang="de">Deutsch</a>
+                        <a href="#" data-lang="it">Italiano</a>
+                    </div>
+                </div>
+                
+                <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <h1><span id="title-part1">Everything is</span> <span class="highlight" id="magic-word">FOUR</span></h1>
+            <p class="tagline" id="tagline">Every word eventually leads to four. Try it yourself!</p>
+        </header>
+
+        <section class="demo">
+            <div class="input-container">
+                <input type="text" id="wordInput" placeholder="Enter any word..." autocomplete="off">
+                <button id="checkButton">Check</button>
+                <button id="suggestButton" class="suggest-button">Suggest a Word</button>
+            </div>
+            <div class="results" id="results">
+                <div class="path-container" id="pathContainer"></div>
+                <div class="conclusion hidden" id="conclusion">
+                    <p id="conclusion-text">Every word eventually leads to <span class="highlight">FOUR</span>!</p>
+                    <div class="action-buttons">
+                        <button id="shareButton" class="action-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                                <polyline points="16 6 12 2 8 6"></polyline>
+                                <line x1="12" y1="2" x2="12" y2="15"></line>
+                            </svg>
+                            Share
+                        </button>
+                        <button id="saveImageButton" class="action-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                            Save as Image
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="dashboard hidden" id="dashboard">
+            <h2>Word Statistics</h2>
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalWords">0</div>
+                    <div class="stat-label">Words Tried</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgSteps">0</div>
+                    <div class="stat-label">Avg. Steps</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="longestPath">0</div>
+                    <div class="stat-label">Longest Path</div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="statsChart"></canvas>
+            </div>
+        </section>
+        
+        <section class="history-section hidden" id="historySection">
+            <h2>Word History</h2>
+            <div class="history-container" id="historyContainer">
+                <!-- Word history items will be added here -->
+            </div>
+        </section>
+        
+        <section class="community-section hidden" id="communitySection">
+            <h2>Community Words</h2>
+            <div class="popular-words">
+                <h3>Popular Words</h3>
+                <div class="word-cloud" id="wordCloud">
+                    <!-- Word cloud items will be added here -->
+                </div>
+            </div>
+            <div class="interesting-paths">
+                <h3>Interesting Paths</h3>
+                <div class="path-list" id="interestingPaths">
+                    <!-- Interesting paths will be added here -->
+                </div>
+            </div>
+        </section>
+
+        <section class="explanation">
+            <h2 id="how-it-works">How it works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <p id="step1">Start with any word</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <p id="step2">Count the number of letters in the word</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <p id="step3">Write out that number as a word</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <p id="step4">Repeat steps 2-3 until you reach "four"</p>
+                </div>
+            </div>
+            <div class="example">
+                <p id="example">Example: <span class="word">programming</span> → <span class="word">eleven</span> → <span class="word">six</span> → <span class="word">three</span> → <span class="word">five</span> → <span class="word">four</span> → <span class="word">four</span></p>
+            </div>
+        </section>
+
+        <section class="daily-challenge" id="dailyChallenge">
+            <h2>Daily Word Challenge</h2>
+            <div class="challenge-container">
+                <div class="challenge-word" id="challengeWord">extraordinary</div>
+                <p class="challenge-description">How many steps will it take to reach four?</p>
+                <button id="solveChallenge" class="challenge-btn">Solve Challenge</button>
+            </div>
+        </section>
+
+        <section class="path-optimizer" id="pathOptimizer">
+            <h2>Path Optimizer</h2>
+            <div class="optimizer-container">
+                <p>Find the shortest path to your magic number</p>
+                <div class="optimizer-input">
+                    <input type="text" id="optimizerInput" placeholder="Enter a word to optimize...">
+                    <button id="optimizeButton">Optimize</button>
+                </div>
+                <div class="optimizer-results" id="optimizerResults">
+                    <!-- Optimizer results will appear here -->
+                </div>
+            </div>
+        </section>
+
+        <div class="audio-player" id="audioPlayer">
+            <button id="toggleAudio" class="audio-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                </svg>
+                <span id="audioStatus">Enable Audio</span>
+            </button>
+        </div>
+
+        <footer>
+            <p id="footer-text">Created with 💻 and curiosity</p>
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="main">Main</button>
+                <button class="nav-tab" data-tab="stats">Statistics</button>
+                <button class="nav-tab" data-tab="history">History</button>
+                <button class="nav-tab" data-tab="community">Community</button>
+                <button class="nav-tab" data-tab="challenge">Challenge</button>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

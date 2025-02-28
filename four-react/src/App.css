@@ -1,0 +1,19 @@
+.app-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+}
+
+footer {
+  text-align: center;
+  padding: 2rem 0;
+  color: var(--dark);
+  opacity: 0.6;
+}

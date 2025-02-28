@@ -1,9 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { languageData } from '../data';
 import './Header.css';
 
 const Header = ({ currentLanguage, setCurrentLanguage, theme, toggleTheme }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleLanguageChange = (lang) => {
     setCurrentLanguage(lang);
@@ -13,7 +28,7 @@ const Header = ({ currentLanguage, setCurrentLanguage, theme, toggleTheme }) => 
   return (
     <header className="header">
       <div className="top-controls">
-        <div className="language-selector">
+        <div className="language-selector" ref={dropdownRef}>
           <div 
             className="language-button"
             onClick={() => setDropdownOpen(!dropdownOpen)}

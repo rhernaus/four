@@ -107,7 +107,7 @@ button:hover {
 }
 
 .conclusion .highlight {
-  color: var(--secondary);
+  color: var(--secondary) !important;
 }
 
 .action-buttons {

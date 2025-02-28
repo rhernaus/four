@@ -102,6 +102,31 @@
   background-color: rgba(93, 59, 232, 0.1);
 }
 
+.moon-icon, .sun-icon {
+  position: absolute;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+[data-theme="dark"] .moon-icon {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+[data-theme="dark"] .sun-icon {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.moon-icon {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sun-icon {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
 .title-container {
   margin-top: 3rem;
 }
@@ -110,6 +135,9 @@ h1 {
   font-size: 3.5rem;
   font-weight: 700;
   margin-bottom: 1rem;
+}
+
+h1 > span:first-child {
   background: linear-gradient(120deg, var(--primary), var(--primary-light));
   background-clip: text;
   -webkit-background-clip: text;
@@ -117,7 +145,7 @@ h1 {
 }
 
 .highlight {
-  color: var(--secondary);
+  color: var(--secondary) !important;
   position: relative;
   font-weight: 700;
 }

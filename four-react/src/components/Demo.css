@@ -204,9 +204,9 @@ button:hover::after {
 }
 
 @keyframes float {
-  0% { transform: translateY(0) scale(0.98); }
-  50% { transform: translateY(-10px) scale(0.98); }
-  100% { transform: translateY(0) scale(0.98); }
+  0% { transform: scale(0.98); }
+  50% { transform: scale(0.99); }
+  100% { transform: scale(0.98); }
 }
 
 .conclusion .highlight {

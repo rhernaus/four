@@ -12,8 +12,9 @@ function App() {
   const [path, setPath] = useState([]);
   const [showConclusion, setShowConclusion] = useState(false);
 
-  // Initialize theme from local storage
+  // Initialize theme from local storage and detect language
   useEffect(() => {
+    // Theme initialization
     const savedTheme = localStorage.getItem('theme');
     const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
     
@@ -21,10 +22,27 @@ function App() {
       setTheme('dark');
       document.body.setAttribute('data-theme', 'dark');
     }
-  }, []);
-
-  // Check URL parameters on mount
-  useEffect(() => {
+    
+    // Language detection
+    const detectLanguage = () => {
+      const browserLang = navigator.language || navigator.userLanguage;
+      const shortLang = browserLang.split('-')[0];
+      
+      // Check if we support this language
+      if (languageData[shortLang]) {
+        setCurrentLanguage(shortLang);
+        return shortLang;
+      }
+      
+      // Default to English if language not supported
+      return 'en';
+    };
+    
+    // Only set language if it hasn't been set by URL parameters
+    const detectedLang = detectLanguage();
+    setCurrentLanguage(detectedLang);
+    
+    // Check URL parameters
     checkUrlParameters();
   }, []);
 
@@ -100,15 +118,29 @@ function App() {
     
     // Reset state
     setShowConclusion(false);
+    setPath([]);
     
-    // Calculate and set the path
+    // Calculate path
     const newPath = calculatePath(word);
-    setPath(newPath);
     
-    // Show conclusion with a slight delay
-    setTimeout(() => {
-      setShowConclusion(true);
-    }, newPath.length * 300);
+    // Display path gradually
+    let displayedPath = [];
+    const pathDisplayInterval = setInterval(() => {
+      if (displayedPath.length < newPath.length) {
+        displayedPath = [...newPath.slice(0, displayedPath.length + 1)];
+        setPath(displayedPath);
+        
+        // Show conclusion when path is complete
+        if (displayedPath.length === newPath.length) {
+          clearInterval(pathDisplayInterval);
+          setTimeout(() => {
+            setShowConclusion(true);
+          }, 500);
+        }
+      } else {
+        clearInterval(pathDisplayInterval);
+      }
+    }, 300);
   };
 
   // Suggest a random word in current language
@@ -134,27 +166,30 @@ function App() {
     const pathParts = pathname.split('/').filter(part => part !== '');
     
     if (pathParts.length >= 1) {
-      let lang = 'en';  // Default language
+      let lang = '';  // We'll determine language either from URL or browser
       let urlWord = '';
       
       // Check if the first part is a language code
       if (pathParts.length >= 2 && Object.keys(languageData).includes(pathParts[0])) {
         lang = pathParts[0];
         urlWord = decodeURIComponent(pathParts[1]);
+        
+        // Set language explicitly from URL
+        if (languageData[lang]) {
+          setCurrentLanguage(lang);
+        }
       } else {
         // Single part - just the word
         urlWord = decodeURIComponent(pathParts[0]);
       }
       
-      // Set language
-      if (languageData[lang]) {
-        setCurrentLanguage(lang);
-      }
-      
       // Set and check word
       if (urlWord) {
         setWord(urlWord);
-        checkWord(urlWord);
+        // Use setTimeout to ensure the language is set before checking the word
+        setTimeout(() => {
+          checkWord(urlWord);
+        }, 0);
         return; // We've handled the URL, no need to check query params
       }
     }
@@ -173,8 +208,10 @@ function App() {
         }
       }
       
-      // Process the word
-      checkWord(urlWord);
+      // Process the word (with delay to ensure language is set)
+      setTimeout(() => {
+        checkWord(urlWord);
+      }, 0);
     }
   };
 

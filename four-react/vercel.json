@@ -1,7 +1,0 @@
-{
-  "rewrites": [
-    { "source": "/(nl|de|en)/:word", "destination": "/index.html" },
-    { "source": "/:word", "destination": "/index.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
-}

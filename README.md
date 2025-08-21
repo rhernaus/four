@@ -1,6 +1,7 @@
 # Everything is FOUR
 
-A fun web app demonstrating the "four is cosmic" theory in multiple languages. Every word eventually leads to four when you count its letters and repeat.
+A fun web app demonstrating the "four is cosmic" theory in multiple languages.
+Every word eventually leads to four when you count its letters and repeat.
 
 ## How It Works
 
@@ -21,24 +22,21 @@ Example: `programming` → `eleven` → `six` → `three` → `five` → `four` 
 
 ## Technologies
 
-- React
+- Vanilla JavaScript
 - CSS
-- Vercel for deployment
+- Static hosting (GitHub Pages, Vercel)
 
 ## Development
 
-To run the project locally:
+This is a static site. You can open `index.html` directly or serve it with any
+static server:
 
-```
-npm install
-npm start
+```bash
+npx serve .
 ```
 
-To build for production:
-
-```
-npm run build
-```
+SPA-style routing is supported via `404.html` (GitHub Pages) and `vercel.json`
+(Vercel). The app detects and respects subpath deployments.
 
 ## Languages
 

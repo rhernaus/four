@@ -1,78 +1,108 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Redirecting...</title>
     <script>
-        // Get the current path (everything after the domain)
-        const pathname = window.location.pathname;
-        const pathParts = pathname.split('/').filter(part => part !== '');
-        
-        // Base URL (GitHub Pages)
-        const baseUrl = window.location.origin;
-        
-        // Handle redirects for language/word paths
-        if (pathParts.length >= 1) {
-            // Check if the first part is a valid language code
-            const validLangs = ['en', 'nl', 'de'];
-            let redirectUrl = baseUrl;
-            
-            if (pathParts.length >= 2 && validLangs.includes(pathParts[0])) {
-                // Format: /lang/word
-                const lang = pathParts[0];
-                const word = pathParts[1];
-                redirectUrl = `${baseUrl}?lang=${lang}&word=${encodeURIComponent(word)}`;
-            } else if (pathParts.length >= 1) {
-                // Format: /word
-                const word = pathParts[0];
-                redirectUrl = `${baseUrl}?word=${encodeURIComponent(word)}`;
-            }
-            
-            // Redirect to the correct URL with query parameters
-            window.location.replace(redirectUrl);
-        } else {
-            // If no path parts, redirect to home
-            window.location.replace(baseUrl);
+      // Helpers to respect base path deployments
+      const SUPPORTED_LANGS = new Set(["en", "nl", "de"]);
+      function getBasePath() {
+        const parts = window.location.pathname.split("/").filter(Boolean);
+        if (parts.length === 0) return "";
+        if (SUPPORTED_LANGS.has(parts[0])) return "";
+        return `/${parts[0]}`;
+      }
+      const siteBase = window.location.origin + getBasePath();
+
+      // Get the current path (minus base path)
+      const parts = window.location.pathname.split("/").filter(Boolean);
+      const baseParts = getBasePath().split("/").filter(Boolean);
+      const pathParts = parts.slice(baseParts.length);
+
+      // Handle redirects for language/word paths
+      if (pathParts.length >= 1) {
+        // Check if the first part is a valid language code
+        const validLangs = ["en", "nl", "de"];
+        let redirectUrl = siteBase;
+
+        if (pathParts.length >= 2 && validLangs.includes(pathParts[0])) {
+          // Format: /lang/word
+          const lang = pathParts[0];
+          const word = pathParts[1];
+          redirectUrl = `${siteBase}/?lang=${lang}&word=${encodeURIComponent(word)}`;
+        } else if (pathParts.length >= 1) {
+          // Format: /word
+          const word = pathParts[0];
+          redirectUrl = `${siteBase}/?word=${encodeURIComponent(word)}`;
         }
+
+        // Redirect to the correct URL with query parameters
+        window.location.replace(redirectUrl);
+      } else {
+        // If no path parts, redirect to home
+        window.location.replace(siteBase + "/");
+      }
     </script>
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f8f9fa;
-            color: #333;
-            text-align: center;
+      body {
+        font-family: "Poppins", sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f8f9fa;
+        color: #333;
+        text-align: center;
+      }
+
+      .loader {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
         }
-        
-        .loader {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+        100% {
+          transform: rotate(360deg);
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .container {
-            padding: 20px;
-        }
+      }
+
+      .container {
+        padding: 20px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="loader"></div>
-        <h2>Redirecting...</h2>
-        <p>If you are not redirected automatically, <a href="/">click here</a>.</p>
+      <div class="loader"></div>
+      <h2>Redirecting...</h2>
+      <p>
+        If you are not redirected automatically,
+        <a id="homeLink" href="#">click here</a>.
+      </p>
     </div>
-</body>
+    <script>
+      // Set correct home link with base path
+      (function () {
+        const SUPPORTED_LANGS = new Set(["en", "nl", "de"]);
+        function getBasePath() {
+          const parts = window.location.pathname.split("/").filter(Boolean);
+          if (parts.length === 0) return "";
+          if (SUPPORTED_LANGS.has(parts[0])) return "";
+          return `/${parts[0]}`;
+        }
+        const siteBase = window.location.origin + getBasePath();
+        const link = document.getElementById("homeLink");
+        if (link) link.href = siteBase + "/";
+      })();
+    </script>
+  </body>
 </html>

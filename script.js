@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
         step3: "Schrijf dat nummer uit als een woord",
         step4: 'Herhaal stappen 2-3 totdat je "vier" bereikt',
         example: "", // Will be generated dynamically
-        footer: "Gemaakt met 💻 en nieuwsgierigheid",
+        footer: "Aangedreven door nieuwsgierigheid",
         shareButton: "Delen",
         shareDialogTitle: "Deel deze ontdekking",
         shareDialogText: "Deel deze link met anderen:",
@@ -213,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
         step3: "Write out that number as a word",
         step4: 'Repeat steps 2-3 until you reach "four"',
         example: "", // Will be generated dynamically
-        footer: "Created with 💻 and curiosity",
+        footer: "Powered by curiosity",
         shareButton: "Share",
         shareDialogTitle: "Share this discovery",
         shareDialogText: "Share this link with others:",
@@ -270,7 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
         step3: "Schreiben Sie diese Zahl als Wort aus",
         step4: 'Wiederholen Sie die Schritte 2-3, bis Sie "vier" erreichen',
         example: "", // Will be generated dynamically
-        footer: "Erstellt mit 💻 und Neugier",
+        footer: "Angetrieben von Neugier",
         shareButton: "Teilen",
         shareDialogTitle: "Diese Entdeckung teilen",
         shareDialogText: "Teilen Sie diesen Link mit anderen:",

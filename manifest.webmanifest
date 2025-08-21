@@ -1,8 +1,7 @@
 {
   "name": "Everything is Four",
   "short_name": "Four",
-  "start_url": "/four/",
-  "scope": "/four/",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#5d3be8",

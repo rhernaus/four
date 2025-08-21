@@ -334,9 +334,7 @@ button:hover {
   color: var(--secondary);
 }
 
-.hidden {
-  display: none;
-}
+/* .hidden already defined below; keep a single definition to avoid duplication */
 
 .explanation {
   margin-bottom: 3rem;

@@ -7,6 +7,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const languageDropdown = document.getElementById('languageDropdown');
     const languageDisplay = document.getElementById('languageDisplay');
     
+    // Supported languages and URL helpers
+    const SUPPORTED_LANGS = new Set(['en', 'nl', 'de']);
+    function getBasePath() {
+        // Handles deployments under subpaths, e.g. GitHub Pages /four
+        const parts = window.location.pathname.split('/').filter(Boolean);
+        if (parts.length === 0) return '';
+        // If first segment is a known language, we are at root
+        if (SUPPORTED_LANGS.has(parts[0])) return '';
+        // Otherwise treat the first segment as base path
+        return `/${parts[0]}`;
+    }
+    const siteBase = window.location.origin + getBasePath();
+    function buildWordPath(lang, word) {
+        return lang === 'en' ? `/${encodeURIComponent(word)}` : `/${lang}/${encodeURIComponent(word)}`;
+    }
+    let suppressPushState = false;
+    
     // Example words for each language
     const exampleWords = {
         'en': [
@@ -161,24 +178,71 @@ document.addEventListener('DOMContentLoaded', () => {
         currentLanguage = detectLanguage();
         updateUI(currentLanguage);
         
-        // Debug the language button
-        console.log("Language button:", languageButton);
-        
-        // Set up language switcher more directly
-        document.querySelector('.language-button').onclick = function(e) {
+        // Set up language switcher
+        const langButtonEl = document.querySelector('.language-button');
+        langButtonEl.setAttribute('role', 'button');
+        langButtonEl.setAttribute('tabindex', '0');
+        langButtonEl.setAttribute('aria-haspopup', 'menu');
+        langButtonEl.setAttribute('aria-controls', 'languageDropdown');
+        langButtonEl.setAttribute('aria-expanded', 'false');
+        langButtonEl.onclick = function(e) {
             e.preventDefault();
-            console.log("Button clicked");
-            document.getElementById('languageDropdown').classList.toggle('active');
+            const dd = document.getElementById('languageDropdown');
+            const willOpen = !dd.classList.contains('active');
+            dd.classList.toggle('active');
+            langButtonEl.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+            if (willOpen) {
+                const firstItem = dd.querySelector('a');
+                if (firstItem) firstItem.focus();
+            }
         };
+        // Keyboard support
+        langButtonEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                langButtonEl.click();
+            }
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const firstItem = document.getElementById('languageDropdown').querySelector('a');
+                if (firstItem) firstItem.focus();
+            }
+            if (e.key === 'Escape') {
+                const dd = document.getElementById('languageDropdown');
+                dd.classList.remove('active');
+                langButtonEl.setAttribute('aria-expanded', 'false');
+            }
+        });
         
         // Set up language selection
         const languageLinks = document.querySelectorAll('.language-dropdown a');
         languageLinks.forEach(link => {
+            link.setAttribute('role', 'menuitem');
+            link.setAttribute('tabindex', '-1');
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const lang = e.target.getAttribute('data-lang');
                 setLanguage(lang);
                 document.getElementById('languageDropdown').classList.remove('active');
+                langButtonEl.setAttribute('aria-expanded', 'false');
+            });
+            link.addEventListener('keydown', (e) => {
+                const items = Array.from(document.querySelectorAll('.language-dropdown a'));
+                const idx = items.indexOf(e.currentTarget);
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const next = items[(idx + 1) % items.length];
+                    next && next.focus();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const prev = items[(idx - 1 + items.length) % items.length];
+                    prev && prev.focus();
+                } else if (e.key === 'Escape') {
+                    const dd = document.getElementById('languageDropdown');
+                    dd.classList.remove('active');
+                    langButtonEl.setAttribute('aria-expanded', 'false');
+                    langButtonEl.focus();
+                }
             });
         });
         
@@ -186,6 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.language-selector')) {
                 document.getElementById('languageDropdown').classList.remove('active');
+                langButtonEl.setAttribute('aria-expanded', 'false');
             }
         });
     }
@@ -251,6 +316,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateUI(lang) {
         const data = languageData[lang];
         
+        // Update document language
+        document.documentElement.lang = lang;
+
         // Update language display
         languageDisplay.textContent = data.name;
         
@@ -271,6 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </svg>
             ${data.ui.shareButton}
         `;
+        shareButton.setAttribute('aria-label', data.ui.shareButton);
         // Replace the uppercase magic number (FOUR/VIER) with a highlighted span
         const uppercaseMagic = data.magicNumber.toUpperCase();
         document.getElementById('conclusion-text').innerHTML = data.ui.conclusion.replace(uppercaseMagic, `<span class="highlight">${uppercaseMagic}</span>`);
@@ -423,6 +492,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (isFinal) {
                     setTimeout(() => {
                         conclusion.classList.remove('hidden');
+                        // Move focus for screen readers
+                        if (conclusion && typeof conclusion.focus === 'function') {
+                            conclusion.focus();
+                        }
                     }, 500);
                 }
             }, delay);
@@ -444,6 +517,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // Calculate and display the path
         const path = calculatePath(word);
         displayPath(path);
+
+        // Update URL and meta if not suppressed (e.g., initial load)
+        if (!suppressPushState) {
+            const newPath = buildWordPath(currentLanguage, word);
+            const newUrl = siteBase + newPath;
+            if (window.location.href !== newUrl) {
+                history.pushState({ word, lang: currentLanguage }, '', newUrl);
+            }
+            updateMetaTags(currentLanguage, word);
+        }
     }
 
     // Get a new random example when clicked
@@ -545,16 +628,8 @@ document.addEventListener('DOMContentLoaded', () => {
             shareText = `I discovered that "${word}" leads to "${magicNumber}" in ${getPathLength(word)} steps! Try it yourself:`;
         }
         
-        // Create clean URL structure: website.com/nl/longword 
-        let basePath = window.location.origin;
-        
-        // If currentLanguage is English (default), don't include language in the path
-        let shareUrl;
-        if (currentLanguage === 'en') {
-            shareUrl = `${basePath}/${encodeURIComponent(word)}`;
-        } else {
-            shareUrl = `${basePath}/${currentLanguage}/${encodeURIComponent(word)}`;
-        }
+        // Create clean URL structure respecting base path
+        const shareUrl = siteBase + buildWordPath(currentLanguage, word);
         
         // Use custom share dialog on desktop, Web Share API on mobile
         if (navigator.share && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
@@ -582,6 +657,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const closeShareDialog = document.getElementById('closeShareDialog');
         const copyShareUrl = document.getElementById('copyShareUrl');
         const copySuccess = document.getElementById('copySuccess');
+        const dialogContent = document.querySelector('.share-dialog-content');
+        let previouslyFocused = document.activeElement;
         
         // Set the URL in the input field
         shareUrlInput.value = shareUrl;
@@ -589,24 +666,45 @@ document.addEventListener('DOMContentLoaded', () => {
         // Show the dialog
         shareDialog.classList.add('active');
         shareDialog.classList.remove('hidden');
+        // Focus the close button for accessibility
+        closeShareDialog.focus();
         
         // Handle copy button
-        copyShareUrl.onclick = function() {
-            shareUrlInput.select();
-            document.execCommand('copy');
-            copySuccess.classList.remove('hidden');
-            setTimeout(() => {
-                copySuccess.classList.add('hidden');
-            }, 3000);
+        copyShareUrl.onclick = async function() {
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(shareUrlInput.value);
+                } else {
+                    // Fallback
+                    shareUrlInput.select();
+                    document.execCommand('copy');
+                }
+                copySuccess.classList.remove('hidden');
+                setTimeout(() => {
+                    copySuccess.classList.add('hidden');
+                }, 3000);
+            } catch (err) {
+                // Fallback on error
+                shareUrlInput.select();
+                document.execCommand('copy');
+                copySuccess.classList.remove('hidden');
+                setTimeout(() => {
+                    copySuccess.classList.add('hidden');
+                }, 3000);
+            }
         };
         
-        // Handle close button
-        closeShareDialog.onclick = function() {
+        function closeModal() {
             shareDialog.classList.remove('active');
             setTimeout(() => {
                 shareDialog.classList.add('hidden');
+                if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
+                    previouslyFocused.focus();
+                }
             }, 300);
-        };
+        }
+        // Handle close button
+        closeShareDialog.onclick = closeModal;
         
         // Handle social platform buttons
         document.getElementById('shareTwitter').onclick = function() {
@@ -624,12 +722,32 @@ document.addEventListener('DOMContentLoaded', () => {
         // Close on background click
         shareDialog.onclick = function(event) {
             if (event.target === shareDialog) {
-                shareDialog.classList.remove('active');
-                setTimeout(() => {
-                    shareDialog.classList.add('hidden');
-                }, 300);
+                closeModal();
             }
         };
+        // Trap focus inside dialog
+        const focusable = dialogContent.querySelectorAll('a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])');
+        const firstFocusable = focusable[0];
+        const lastFocusable = focusable[focusable.length - 1];
+        shareDialog.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                closeModal();
+            }
+            if (e.key === 'Tab') {
+                if (e.shiftKey) {
+                    if (document.activeElement === firstFocusable) {
+                        e.preventDefault();
+                        lastFocusable.focus();
+                    }
+                } else {
+                    if (document.activeElement === lastFocusable) {
+                        e.preventDefault();
+                        firstFocusable.focus();
+                    }
+                }
+            }
+        });
     }
     
     // Helper to copy text to clipboard
@@ -651,39 +769,31 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Check URL structure and extract parameters
     function checkUrlParameters() {
-        // First, check if we're using the new URL format
-        const pathname = window.location.pathname;
-        const pathParts = pathname.split('/').filter(part => part !== '');
+        // Respect deployments under a base path
+        const parts = window.location.pathname.split('/').filter(Boolean);
+        const baseParts = getBasePath().split('/').filter(Boolean);
+        const pp = parts.slice(baseParts.length);
         
-        if (pathParts.length >= 1) {
-            let lang = 'en';  // Default language
+        if (pp.length >= 1) {
+            let lang = 'en';
             let word = '';
-            
-            // Check if the first part is a language code
-            if (pathParts.length >= 2 && Object.keys(languageData).includes(pathParts[0])) {
-                lang = pathParts[0];
-                word = decodeURIComponent(pathParts[1]);
-                
-                // Update canonical and meta tags for SEO
-                updateMetaTags(lang, word);
-            } else {
-                // Single part - just the word
-                word = decodeURIComponent(pathParts[0]);
-                
-                // Update canonical and meta tags for SEO
-                updateMetaTags('en', word);
+            if (pp.length >= 2 && SUPPORTED_LANGS.has(pp[0])) {
+                lang = pp[0];
+                word = decodeURIComponent(pp[1]);
+            } else if (pp.length >= 1) {
+                word = decodeURIComponent(pp[0]);
+                lang = 'en';
             }
-            
-            // Set language
             if (languageData[lang]) {
                 setLanguage(lang);
             }
-            
-            // Set and check word
             if (word) {
+                suppressPushState = true;
                 wordInput.value = word;
+                updateMetaTags(lang, word);
                 checkWord();
-                return; // We've handled the URL, no need to check query params
+                suppressPushState = false;
+                return;
             }
         }
         
@@ -701,8 +811,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            // Process the word
+            suppressPushState = true;
             checkWord();
+            suppressPushState = false;
         }
     }
     
@@ -711,7 +822,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = languageData[lang];
         const magicNumber = data.magicNumber;
         const pathLength = getPathLength(word);
-        const baseUrl = window.location.origin;
+        const baseUrl = siteBase;
         
         // Construct proper canonical URL
         let canonicalUrl;
@@ -726,6 +837,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (canonicalLink) {
             canonicalLink.setAttribute('href', canonicalUrl);
         }
+        
+        // Update hreflang alternates
+        document.querySelectorAll('link[rel="alternate"]').forEach(el => el.parentNode.removeChild(el));
+        ['en','nl','de'].forEach(code => {
+            const link = document.createElement('link');
+            link.setAttribute('rel', 'alternate');
+            link.setAttribute('hreflang', code);
+            link.setAttribute('href', siteBase + (code === 'en' ? `/${encodeURIComponent(word)}` : `/${code}/${encodeURIComponent(word)}`));
+            document.head.appendChild(link);
+        });
+        const xdef = document.createElement('link');
+        xdef.setAttribute('rel', 'alternate');
+        xdef.setAttribute('hreflang', 'x-default');
+        xdef.setAttribute('href', siteBase + `/${encodeURIComponent(word)}`);
+        document.head.appendChild(xdef);
         
         // Update meta description
         let description;
@@ -747,6 +873,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let ogTitle = document.querySelector('meta[property="og:title"]');
         let ogDescription = document.querySelector('meta[property="og:description"]');
         let ogUrl = document.querySelector('meta[property="og:url"]');
+        let ogImage = document.querySelector('meta[property="og:image"]');
         
         if (ogTitle) {
             ogTitle.setAttribute('content', `${word} → ${magicNumber} | Everything is Four`);
@@ -757,11 +884,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (ogUrl) {
             ogUrl.setAttribute('content', canonicalUrl);
         }
+        if (ogImage) {
+            ogImage.setAttribute('content', `${siteBase}/og-image.png`);
+        }
         
         // Update Twitter tags
         let twitterTitle = document.querySelector('meta[name="twitter:title"]');
         let twitterDescription = document.querySelector('meta[name="twitter:description"]');
         let twitterUrl = document.querySelector('meta[name="twitter:url"]');
+        let twitterImage = document.querySelector('meta[name="twitter:image"]');
         
         if (twitterTitle) {
             twitterTitle.setAttribute('content', `${word} → ${magicNumber} | Everything is Four`);
@@ -772,10 +903,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (twitterUrl) {
             twitterUrl.setAttribute('content', canonicalUrl);
         }
+        if (twitterImage) {
+            twitterImage.setAttribute('content', `${siteBase}/og-image.png`);
+        }
         
         // Update page title
         document.title = `${word} → ${magicNumber} | Everything is Four`;
     }
     
     // checkUrlParameters is called above in the main initialization
+    window.onpopstate = (e) => {
+        const state = e.state;
+        if (state && state.word && state.lang) {
+            if (languageData[state.lang]) setLanguage(state.lang);
+            suppressPushState = true;
+            wordInput.value = state.word;
+            checkWord();
+            suppressPushState = false;
+        }
+    };
 });

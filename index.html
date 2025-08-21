@@ -6,6 +6,8 @@
     <title>Everything is Four | The Word Length Number Sequence Game</title>
     <meta name="description" content="Discover the fascinating pattern where every word in any language eventually leads to four through a simple counting algorithm. Try it with any word!">
     <meta name="keywords" content="four, number sequence, word game, mathematical curiosity, number patterns, language game">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -26,6 +28,7 @@
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="manifest" href="manifest.webmanifest">
     
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -89,13 +92,14 @@
 
         <section class="demo">
             <div class="input-container">
+                <label for="wordInput" class="sr-only">Enter a word</label>
                 <input type="text" id="wordInput" placeholder="Enter any word..." autocomplete="off">
                 <button id="checkButton">Check</button>
                 <button id="suggestButton" class="suggest-button">Suggest a Word</button>
             </div>
-            <div class="results" id="results">
+            <div class="results" id="results" role="region" aria-live="polite" aria-label="Computation results">
                 <div class="path-container" id="pathContainer"></div>
-                <div class="conclusion hidden" id="conclusion">
+                <div class="conclusion hidden" id="conclusion" tabindex="-1">
                     <p id="conclusion-text">Every word eventually leads to <span class="highlight">FOUR</span>!</p>
                     <div class="action-buttons">
                         <button id="shareButton" class="action-btn">
@@ -140,11 +144,11 @@
 
         
         <!-- Custom Share Dialog -->
-        <div id="shareDialog" class="share-dialog hidden">
+        <div id="shareDialog" class="share-dialog hidden" role="dialog" aria-modal="true" aria-labelledby="shareDialogTitle">
             <div class="share-dialog-content">
                 <div class="share-dialog-header">
-                    <h3>Share this discovery</h3>
-                    <button id="closeShareDialog" class="close-button">×</button>
+                    <h3 id="shareDialogTitle">Share this discovery</h3>
+                    <button id="closeShareDialog" class="close-button" aria-label="Close share dialog">×</button>
                 </div>
                 <div class="share-dialog-body">
                     <p>Share this link with others:</p>
@@ -158,7 +162,7 @@
                             Copy
                         </button>
                     </div>
-                    <div class="share-success hidden" id="copySuccess">
+                    <div class="share-success hidden" id="copySuccess" role="status" aria-live="polite">
                         <span>Copied to clipboard!</span>
                     </div>
                     <div class="share-platforms">
@@ -319,10 +323,13 @@
                         const isDark = document.body.getAttribute('data-theme') === 'dark';
                         const particleColor = isDark ? '#7e61ff' : '#5d3be8';
                         
-                        // Update particle colors
-                        pJSDom[0].pJS.particles.color.value = particleColor;
-                        pJSDom[0].pJS.particles.line_linked.color = particleColor;
-                        pJSDom[0].pJS.fn.particlesRefresh();
+                        // Update particle colors safely
+                        const pj = window.pJSDom && window.pJSDom[0] && window.pJSDom[0].pJS;
+                        if (pj) {
+                            pj.particles.color.value = particleColor;
+                            pj.particles.line_linked.color = particleColor;
+                            pj.fn.particlesRefresh();
+                        }
                     }, 50);
                 });
             }

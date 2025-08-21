@@ -96,7 +96,7 @@
               <span id="languageDisplay">English</span>
               <span class="dropdown-arrow">▼</span>
             </div>
-            <div class="language-dropdown" id="languageDropdown">
+            <div class="language-dropdown" id="languageDropdown" role="menu">
               <a href="#" data-lang="en">English</a>
               <a href="#" data-lang="nl">Nederlands</a>
               <a href="#" data-lang="de">Deutsch</a>
@@ -106,7 +106,9 @@
           <button
             id="themeToggle"
             class="theme-toggle"
+            type="button"
             aria-label="Toggle dark mode"
+            aria-pressed="false"
           >
             <svg
               class="sun-icon"
@@ -160,9 +162,12 @@
             id="wordInput"
             placeholder="Enter any word..."
             autocomplete="off"
+            enterkeyhint="go"
+            spellcheck="false"
+            autocapitalize="off"
           />
-          <button id="checkButton">Check</button>
-          <button id="suggestButton" class="suggest-button">
+          <button id="checkButton" type="button">Check</button>
+          <button id="suggestButton" class="suggest-button" type="button">
             Suggest a Word
           </button>
         </div>
@@ -180,7 +185,7 @@
               <span class="highlight">FOUR</span>!
             </p>
             <div class="action-buttons">
-              <button id="shareButton" class="action-btn">
+              <button id="shareButton" class="action-btn" type="button">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -245,6 +250,7 @@
             <button
               id="closeShareDialog"
               class="close-button"
+              type="button"
               aria-label="Close share dialog"
             >
               ×
@@ -254,7 +260,7 @@
             <p>Share this link with others:</p>
             <div class="share-url-container">
               <input type="text" id="shareUrl" readonly />
-              <button id="copyShareUrl" class="copy-button">
+              <button id="copyShareUrl" class="copy-button" type="button">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -281,7 +287,7 @@
               <span>Copied to clipboard!</span>
             </div>
             <div class="share-platforms">
-              <button class="platform-button" id="shareTwitter">
+              <button class="platform-button" id="shareTwitter" type="button">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -297,7 +303,7 @@
                 </svg>
                 Twitter
               </button>
-              <button class="platform-button" id="shareFacebook">
+              <button class="platform-button" id="shareFacebook" type="button">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -313,7 +319,7 @@
                 </svg>
                 Facebook
               </button>
-              <button class="platform-button" id="shareEmail">
+              <button class="platform-button" id="shareEmail" type="button">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -362,126 +368,92 @@
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="script.js"></script>
     <script>
-      // Initialize particles.js after page load
+      // Initialize particles.js after page load with accessibility and data-saver gating
       document.addEventListener("DOMContentLoaded", function () {
-        particlesJS("particles-js", {
-          particles: {
-            number: {
-              value: 40,
-              density: {
-                enable: true,
-                value_area: 800,
-              },
-            },
-            color: {
-              value: "#5d3be8",
-            },
-            shape: {
-              type: "circle",
-              stroke: {
-                width: 0,
-                color: "#000000",
-              },
-              polygon: {
-                nb_sides: 5,
-              },
-            },
-            opacity: {
-              value: 0.3,
-              random: false,
-              anim: {
-                enable: false,
-                speed: 1,
-                opacity_min: 0.1,
-                sync: false,
-              },
-            },
-            size: {
-              value: 3,
-              random: true,
-              anim: {
-                enable: false,
-                speed: 40,
-                size_min: 0.1,
-                sync: false,
-              },
-            },
-            line_linked: {
-              enable: true,
-              distance: 150,
-              color: "#5d3be8",
-              opacity: 0.2,
-              width: 1,
-            },
-            move: {
-              enable: true,
-              speed: 2,
-              direction: "none",
-              random: false,
-              straight: false,
-              out_mode: "out",
-              bounce: false,
-              attract: {
-                enable: false,
-                rotateX: 600,
-                rotateY: 1200,
-              },
-            },
-          },
-          interactivity: {
-            detect_on: "canvas",
-            events: {
-              onhover: {
-                enable: true,
-                mode: "grab",
-              },
-              onclick: {
-                enable: true,
-                mode: "push",
-              },
-              resize: true,
-            },
-            modes: {
-              grab: {
-                distance: 140,
-                line_linked: {
-                  opacity: 0.5,
-                },
-              },
-              bubble: {
-                distance: 400,
-                size: 40,
-                duration: 2,
-                opacity: 8,
-                speed: 3,
-              },
-              repulse: {
-                distance: 200,
-                duration: 0.4,
-              },
-              push: {
-                particles_nb: 4,
-              },
-              remove: {
-                particles_nb: 2,
-              },
-            },
-          },
-          retina_detect: true,
-        });
+        const prefersReducedMotion =
+          window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const connection =
+          navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        const saveData = connection && connection.saveData;
 
-        // Update particles colors when theme changes
+        function initParticles() {
+          if (!window.particlesJS) return;
+          particlesJS("particles-js", {
+            particles: {
+              number: {
+                value: 40,
+                density: { enable: true, value_area: 800 },
+              },
+              color: { value: "#5d3be8" },
+              shape: {
+                type: "circle",
+                stroke: { width: 0, color: "#000000" },
+                polygon: { nb_sides: 5 },
+              },
+              opacity: {
+                value: 0.3,
+                random: false,
+                anim: { enable: false, speed: 1, opacity_min: 0.1, sync: false },
+              },
+              size: {
+                value: 3,
+                random: true,
+                anim: { enable: false, speed: 40, size_min: 0.1, sync: false },
+              },
+              line_linked: {
+                enable: true,
+                distance: 150,
+                color: "#5d3be8",
+                opacity: 0.2,
+                width: 1,
+              },
+              move: {
+                enable: true,
+                speed: 2,
+                direction: "none",
+                random: false,
+                straight: false,
+                out_mode: "out",
+                bounce: false,
+                attract: { enable: false, rotateX: 600, rotateY: 1200 },
+              },
+            },
+            interactivity: {
+              detect_on: "canvas",
+              events: {
+                onhover: { enable: true, mode: "grab" },
+                onclick: { enable: true, mode: "push" },
+                resize: true,
+              },
+              modes: {
+                grab: { distance: 140, line_linked: { opacity: 0.5 } },
+                bubble: { distance: 400, size: 40, duration: 2, opacity: 8, speed: 3 },
+                repulse: { distance: 200, duration: 0.4 },
+                push: { particles_nb: 4 },
+                remove: { particles_nb: 2 },
+              },
+            },
+            retina_detect: true,
+          });
+        }
+
+        // Only initialize particles if user hasn't requested reduced motion and isn't in data saver mode
+        if (!prefersReducedMotion && !saveData) {
+          if ("requestIdleCallback" in window) {
+            requestIdleCallback(initParticles, { timeout: 2000 });
+          } else {
+            setTimeout(initParticles, 300);
+          }
+        }
+
+        // Update particles colors when theme changes (if initialized)
         const themeToggle = document.getElementById("themeToggle");
         if (themeToggle) {
           themeToggle.addEventListener("click", () => {
             setTimeout(() => {
-              const isDark =
-                document.body.getAttribute("data-theme") === "dark";
+              const isDark = document.body.getAttribute("data-theme") === "dark";
               const particleColor = isDark ? "#7e61ff" : "#5d3be8";
-
-              // Update particle colors safely
-              const pj =
-                window.pJSDom && window.pJSDom[0] && window.pJSDom[0].pJS;
+              const pj = window.pJSDom && window.pJSDom[0] && window.pJSDom[0].pJS;
               if (pj) {
                 pj.particles.color.value = particleColor;
                 pj.particles.line_linked.color = particleColor;

@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
         step3: "Schrijf dat nummer uit als een woord",
         step4: 'Herhaal stappen 2-3 totdat je "vier" bereikt',
         example: "", // Will be generated dynamically
-        footer: "Gemaakt met 💻 en nieuwsgierigheid",
+        footer: "Aangedreven door nieuwsgierigheid",
         shareButton: "Delen",
         shareDialogTitle: "Deel deze ontdekking",
         shareDialogText: "Deel deze link met anderen:",
@@ -213,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
         step3: "Write out that number as a word",
         step4: 'Repeat steps 2-3 until you reach "four"',
         example: "", // Will be generated dynamically
-        footer: "Created with 💻 and curiosity",
+        footer: "Powered by curiosity",
         shareButton: "Share",
         shareDialogTitle: "Share this discovery",
         shareDialogText: "Share this link with others:",
@@ -270,7 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
         step3: "Schreiben Sie diese Zahl als Wort aus",
         step4: 'Wiederholen Sie die Schritte 2-3, bis Sie "vier" erreichen',
         example: "", // Will be generated dynamically
-        footer: "Erstellt mit 💻 und Neugier",
+        footer: "Angetrieben von Neugier",
         shareButton: "Teilen",
         shareDialogTitle: "Diese Entdeckung teilen",
         shareDialogText: "Teilen Sie diesen Link mit anderen:",
@@ -424,22 +424,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Format the path as HTML
-    let exampleHTML =
-      lang === "en"
-        ? "Example: "
-        : lang === "nl"
-          ? "Voorbeeld: "
-          : lang === "es"
-            ? "Ejemplo: "
-            : lang === "fr"
-              ? "Exemple: "
-              : lang === "de"
-                ? "Beispiel: "
-                : lang === "zh"
-                  ? "例如："
-                  : lang === "ja"
-                    ? "例："
-                    : "Example: ";
+    const examplePrefixMap = { en: "Example: ", nl: "Voorbeeld: ", de: "Beispiel: " };
+    let exampleHTML = examplePrefixMap[lang] || "Example: ";
 
     for (let i = 0; i < path.length; i++) {
       exampleHTML += `<span class="word">${path[i]}</span>`;
@@ -533,25 +519,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return ones > 0
           ? `${numberWords[tens]}-${numberWords[ones]}`
           : numberWords[tens];
-      } else if (currentLanguage === "fr") {
-        if (tens === 70 || tens === 90) {
-          // French has special cases for 70s and 90s
-          if (ones === 0) return numberWords[tens];
-          if (tens === 70)
-            return ones <= 9
-              ? `soixante-${numberWords[10 + ones]}`
-              : numberWords[tens];
-          if (tens === 90)
-            return ones <= 9
-              ? `quatre-vingt-${numberWords[ones]}`
-              : numberWords[tens];
-        }
-        return ones > 0
-          ? `${numberWords[tens]}-${numberWords[ones]}`
-          : numberWords[tens];
-      } else if (currentLanguage === "zh" || currentLanguage === "ja") {
-        // Chinese/Japanese use positional notation
-        return `${numberWords[tens / 10]}${numberWords[10]}${ones > 0 ? numberWords[ones] : ""}`;
       } else {
         // Default hyphenation for other languages
         return ones > 0
@@ -720,7 +687,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme === "dark" || (!savedTheme && prefersDarkScheme.matches)) {
       document.body.setAttribute("data-theme", "dark");
+    } else {
+      document.body.setAttribute("data-theme", "light");
     }
+
+    // Sync aria-pressed to current state
+    function syncThemeTogglePressed() {
+      const isDark = (document.body.getAttribute("data-theme") || "light") === "dark";
+      if (themeToggle) themeToggle.setAttribute("aria-pressed", isDark ? "true" : "false");
+    }
+    syncThemeTogglePressed();
 
     // Toggle theme when button is clicked
     themeToggle.addEventListener("click", () => {
@@ -729,6 +705,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       document.body.setAttribute("data-theme", newTheme);
       localStorage.setItem("theme", newTheme);
+      syncThemeTogglePressed();
     });
   }
 
@@ -740,8 +717,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Event Listeners
   checkButton.addEventListener("click", checkWord);
 
-  wordInput.addEventListener("keypress", (e) => {
+  wordInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
+      e.preventDefault();
       checkWord();
     }
   });
@@ -886,17 +864,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Handle social platform buttons
     document.getElementById("shareTwitter").onclick = function () {
-      window.open(
+      const newWin = window.open(
         `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
         "_blank",
+        "noopener,noreferrer"
       );
+      if (newWin) newWin.opener = null;
     };
 
     document.getElementById("shareFacebook").onclick = function () {
-      window.open(
+      const newWin = window.open(
         `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
         "_blank",
+        "noopener,noreferrer"
       );
+      if (newWin) newWin.opener = null;
     };
 
     document.getElementById("shareEmail").onclick = function () {
@@ -936,15 +918,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Helper to copy text to clipboard
-  function copyToClipboard(text) {
-    const textArea = document.createElement("textarea");
-    textArea.value = text;
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(textArea);
-  }
+  // copyToClipboard helper removed (unused)
 
   // Get path length for a word
   function getPathLength(word) {

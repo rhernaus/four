@@ -572,8 +572,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Add the magic number to the end if not already there
     if (currentWord === magicNumber) {
       path.push(currentWord);
-      path.push(magicValue); // The count for the magic number
-      path.push(magicNumber); // And back to the magic number again
     }
 
     return path;

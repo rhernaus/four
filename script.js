@@ -414,13 +414,14 @@ document.addEventListener("DOMContentLoaded", () => {
     while (currentWord !== magicNumber && iterations < maxIterations) {
       path.push(currentWord);
       const letterCount = countLetters(currentWord);
+      path.push(letterCount);
       const numberAsWord = convertNumberToWord(letterCount);
       currentWord = numberAsWord;
       iterations++;
     }
 
     if (currentWord === magicNumber) {
-      path.push(magicNumber);
+      path.push(currentWord);
     }
 
     // Format the path as HTML
@@ -428,7 +429,12 @@ document.addEventListener("DOMContentLoaded", () => {
     let exampleHTML = examplePrefixMap[lang] || "Example: ";
 
     for (let i = 0; i < path.length; i++) {
-      exampleHTML += `<span class="word">${path[i]}</span>`;
+      const item = path[i];
+      if (typeof item === 'number') {
+        exampleHTML += `<span class="number">${item}</span>`;
+      } else {
+        exampleHTML += `<span class="word">${item}</span>`;
+      }
       if (i < path.length - 1) {
         exampleHTML += " → ";
       }

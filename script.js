@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Security: Add DOM element validation with null checks
   const wordInput = document.getElementById("wordInput");
   const checkButton = document.getElementById("checkButton");
   const pathContainer = document.getElementById("pathContainer");
@@ -6,6 +7,86 @@ document.addEventListener("DOMContentLoaded", () => {
   const languageButton = document.getElementById("currentLanguage");
   const languageDropdown = document.getElementById("languageDropdown");
   const languageDisplay = document.getElementById("languageDisplay");
+
+  // Critical elements validation - graceful degradation if missing
+  const criticalElements = {
+    wordInput,
+    checkButton,
+    pathContainer,
+    conclusion,
+    languageButton,
+    languageDropdown,
+    languageDisplay
+  };
+
+  const missingElements = Object.entries(criticalElements)
+    .filter(([name, element]) => !element)
+    .map(([name]) => name);
+
+  if (missingElements.length > 0) {
+    console.error('Critical DOM elements missing:', missingElements);
+    // Show user-friendly error if critical elements are missing
+    const body = document.body;
+    if (body) {
+      const errorDiv = document.createElement('div');
+      errorDiv.style.cssText = 'padding: 20px; margin: 20px; border: 2px solid red; background: #ffe6e6; color: red;';
+      errorDiv.textContent = 'Application error: Some page elements failed to load. Please refresh the page.';
+      body.insertBefore(errorDiv, body.firstChild);
+    }
+    return; // Stop execution if critical elements are missing
+  }
+
+  // Security: HTML sanitization function to prevent XSS
+  function sanitizeText(text) {
+    if (typeof text !== 'string') return '';
+    // Create a temporary element to escape HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.textContent = text;
+    return tempDiv.innerHTML;
+  }
+
+  // Security: Input validation function
+  function validateInput(input) {
+    if (typeof input !== 'string') return false;
+
+    // Length validation
+    if (input.length === 0 || input.length > 100) return false;
+
+    // Character validation - allow letters, spaces, hyphens, apostrophes and extended Latin characters
+    // More comprehensive regex to support multiple languages including Dutch, German, etc.
+    const validCharsRegex = /^[\p{L}\p{M}\s\-']+$/u;
+    return validCharsRegex.test(input);
+  }
+
+  // Security: Safe URL decoding with validation
+  function safeDecodeURIComponent(str) {
+    try {
+      if (typeof str !== 'string') return '';
+      // Limit length to prevent DoS
+      if (str.length > 200) return '';
+      const decoded = decodeURIComponent(str);
+      // Additional validation after decoding
+      return validateInput(decoded) ? decoded : '';
+    } catch (e) {
+      console.warn('URL decoding failed:', e);
+      return '';
+    }
+  }
+
+  // Security: Safe DOM element creation for paths
+  function createPathElement(item, isNumber = false) {
+    const span = document.createElement('span');
+    span.className = isNumber ? 'number' : 'word';
+    span.textContent = String(item); // textContent automatically escapes
+    return span;
+  }
+
+  // Security: Safe way to create arrow separator
+  function createArrowSeparator() {
+    const span = document.createElement('span');
+    span.textContent = ' → ';
+    return span;
+  }
 
   // Supported languages and URL helpers
   const SUPPORTED_LANGS = new Set(["en", "nl", "de"]);
@@ -398,49 +479,70 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Generate a random example path for a given language
   function generateRandomExample(lang) {
-    const data = languageData[lang];
-    const words = exampleWords[lang];
-    const magicNumber = data.magicNumber;
+    try {
+      const data = languageData[lang];
+      const words = exampleWords[lang];
+      if (!data || !words || !Array.isArray(words) || words.length === 0) {
+        console.warn('Invalid language data for:', lang);
+        return null;
+      }
 
-    // Select a random word from examples
-    const randomWord = words[Math.floor(Math.random() * words.length)];
+      const magicNumber = data.magicNumber;
+      // Select a random word from examples
+      const randomWord = words[Math.floor(Math.random() * words.length)];
 
-    // Calculate the path
-    const path = [];
-    let currentWord = randomWord.toLowerCase();
-    let maxIterations = 10;
-    let iterations = 0;
+      // Calculate the path
+      const path = [];
+      let currentWord = randomWord.toLowerCase();
+      let maxIterations = 10;
+      let iterations = 0;
 
-    while (currentWord !== magicNumber && iterations < maxIterations) {
-      path.push(currentWord);
-      const letterCount = countLetters(currentWord);
-      path.push(letterCount);
-      const numberAsWord = convertNumberToWord(letterCount);
-      currentWord = numberAsWord;
-      iterations++;
+      while (currentWord !== magicNumber && iterations < maxIterations) {
+        path.push(currentWord);
+        const letterCount = countLetters(currentWord);
+        path.push(letterCount);
+        const numberAsWord = convertNumberToWord(letterCount);
+        currentWord = numberAsWord;
+        iterations++;
+      }
+
+      if (currentWord === magicNumber) {
+        path.push(currentWord);
+      }
+
+      // Security: Return safe DOM elements instead of HTML string
+      return { path, lang };
+    } catch (e) {
+      console.error('Error generating example:', e);
+      return null;
     }
+  }
 
-    if (currentWord === magicNumber) {
-      path.push(currentWord);
-    }
+  // Security: Safe function to display example using DOM methods
+  function displayExample(exampleData) {
+    const exampleElement = document.getElementById("example");
+    if (!exampleElement || !exampleData) return;
 
-    // Format the path as HTML
+    // Clear previous content safely
+    exampleElement.textContent = '';
+
+    const { path, lang } = exampleData;
     const examplePrefixMap = { en: "Example: ", nl: "Voorbeeld: ", de: "Beispiel: " };
-    let exampleHTML = examplePrefixMap[lang] || "Example: ";
 
+    // Add prefix text
+    const prefixText = document.createTextNode(examplePrefixMap[lang] || "Example: ");
+    exampleElement.appendChild(prefixText);
+
+    // Add path elements safely
     for (let i = 0; i < path.length; i++) {
       const item = path[i];
-      if (typeof item === 'number') {
-        exampleHTML += `<span class="number">${item}</span>`;
-      } else {
-        exampleHTML += `<span class="word">${item}</span>`;
-      }
+      const element = createPathElement(item, typeof item === 'number');
+      exampleElement.appendChild(element);
+
       if (i < path.length - 1) {
-        exampleHTML += " → ";
+        exampleElement.appendChild(createArrowSeparator());
       }
     }
-
-    return exampleHTML;
   }
 
   function updateUI(lang) {
@@ -461,24 +563,71 @@ document.addEventListener("DOMContentLoaded", () => {
     checkButton.textContent = data.ui.checkButton;
     document.getElementById("suggestButton").textContent =
       data.ui.suggestButton;
-    // Update shareButton while preserving the SVG icon
+    // Security: Update shareButton safely using DOM methods
     const shareButton = document.getElementById("shareButton");
-    shareButton.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                <polyline points="16 6 12 2 8 6"></polyline>
-                <line x1="12" y1="2" x2="12" y2="15"></line>
-            </svg>
-            ${data.ui.shareButton}
-        `;
-    shareButton.setAttribute("aria-label", data.ui.shareButton);
-    // Replace the uppercase magic number (FOUR/VIER) with a highlighted span
-    const uppercaseMagic = data.magicNumber.toUpperCase();
-    document.getElementById("conclusion-text").innerHTML =
-      data.ui.conclusion.replace(
-        uppercaseMagic,
-        `<span class="highlight">${uppercaseMagic}</span>`,
-      );
+    if (shareButton) {
+      // Clear existing content
+      shareButton.textContent = '';
+
+      // Create SVG element safely
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("width", "16");
+      svg.setAttribute("height", "16");
+      svg.setAttribute("viewBox", "0 0 24 24");
+      svg.setAttribute("fill", "none");
+      svg.setAttribute("stroke", "currentColor");
+      svg.setAttribute("stroke-width", "2");
+
+      // Create path elements
+      const path1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path1.setAttribute("d", "M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8");
+
+      const polyline = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+      polyline.setAttribute("points", "16 6 12 2 8 6");
+
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", "12");
+      line.setAttribute("y1", "2");
+      line.setAttribute("x2", "12");
+      line.setAttribute("y2", "15");
+
+      svg.appendChild(path1);
+      svg.appendChild(polyline);
+      svg.appendChild(line);
+      shareButton.appendChild(svg);
+
+      // Add text safely
+      const buttonText = document.createTextNode(' ' + data.ui.shareButton);
+      shareButton.appendChild(buttonText);
+      shareButton.setAttribute("aria-label", data.ui.shareButton);
+    }
+
+    // Security: Update conclusion text safely
+    const conclusionText = document.getElementById("conclusion-text");
+    if (conclusionText) {
+      const uppercaseMagic = data.magicNumber.toUpperCase();
+      const conclusionContent = data.ui.conclusion;
+
+      if (conclusionContent.includes(uppercaseMagic)) {
+        // Clear and rebuild with safe DOM methods
+        conclusionText.textContent = '';
+
+        const parts = conclusionContent.split(uppercaseMagic);
+        for (let i = 0; i < parts.length; i++) {
+          if (parts[i]) {
+            conclusionText.appendChild(document.createTextNode(parts[i]));
+          }
+          if (i < parts.length - 1) {
+            const highlight = document.createElement('span');
+            highlight.className = 'highlight';
+            highlight.textContent = uppercaseMagic;
+            conclusionText.appendChild(highlight);
+          }
+        }
+      } else {
+        conclusionText.textContent = conclusionContent;
+      }
+    }
     document.getElementById("how-it-works").textContent = data.ui.howItWorks;
     document.getElementById("step1").textContent = data.ui.step1;
     document.getElementById("step2").textContent = data.ui.step2;
@@ -488,15 +637,19 @@ document.addEventListener("DOMContentLoaded", () => {
       `"${data.magicNumber}"`,
     );
 
-    // Generate a random example for the current language
-    const exampleHTML = generateRandomExample(lang);
-    document.getElementById("example").innerHTML = exampleHTML;
+    // Security: Generate and display example safely
+    const exampleData = generateRandomExample(lang);
+    displayExample(exampleData);
 
     document.getElementById("footer-text").textContent = data.ui.footer;
 
-    // Clear any previous results
-    pathContainer.innerHTML = "";
-    conclusion.classList.add("hidden");
+    // Security: Clear previous results safely
+    if (pathContainer) {
+      pathContainer.textContent = "";
+    }
+    if (conclusion) {
+      conclusion.classList.add("hidden");
+    }
 
     // Update share dialog texts
     document.querySelector(".share-dialog-header h3").textContent =
@@ -509,36 +662,51 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function convertNumberToWord(num) {
-    const data = languageData[currentLanguage];
-    const numberWords = data.numberWords;
-
-    if (num <= 20) {
-      return numberWords[num];
-    }
-
-    if (num < 100) {
-      const tens = Math.floor(num / 10) * 10;
-      const ones = num % 10;
-
-      // Handle language-specific composition rules
-      if (currentLanguage === "en" || currentLanguage === "de") {
-        return ones > 0
-          ? `${numberWords[tens]}-${numberWords[ones]}`
-          : numberWords[tens];
-      } else {
-        // Default hyphenation for other languages
-        return ones > 0
-          ? `${numberWords[tens]}${numberWords[ones]}`
-          : numberWords[tens];
+    try {
+      const data = languageData[currentLanguage];
+      if (!data || !data.numberWords) {
+        console.error('Language data missing for:', currentLanguage);
+        return num.toString();
       }
-    }
 
-    if (num === 100) {
-      return numberWords[num];
-    }
+      const numberWords = data.numberWords;
 
-    // Handle larger numbers as needed
-    return num.toString();
+      if (num <= 20) {
+        const result = numberWords[num];
+        if (!result) {
+          console.error('Number word missing for:', num, 'in language:', currentLanguage);
+          return num.toString();
+        }
+        return result;
+      }
+
+      if (num < 100) {
+        const tens = Math.floor(num / 10) * 10;
+        const ones = num % 10;
+
+        // Handle language-specific composition rules
+        if (currentLanguage === "en" || currentLanguage === "de") {
+          return ones > 0
+            ? `${numberWords[tens]}-${numberWords[ones]}`
+            : numberWords[tens];
+        } else {
+          // Default hyphenation for other languages
+          return ones > 0
+            ? `${numberWords[tens]}${numberWords[ones]}`
+            : numberWords[tens];
+        }
+      }
+
+      if (num === 100) {
+        return numberWords[num];
+      }
+
+      // Handle larger numbers as needed
+      return num.toString();
+    } catch (e) {
+      console.error('Error in convertNumberToWord:', e, 'num:', num, 'lang:', currentLanguage);
+      return num.toString();
+    }
   }
 
   function countLetters(word) {
@@ -611,7 +779,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function displayPath(path) {
-    pathContainer.innerHTML = "";
+    // Security: Clear safely
+    if (pathContainer) {
+      pathContainer.textContent = "";
+    }
 
     // Add elements with a slight delay for animation effect
     let delay = 0;
@@ -622,15 +793,19 @@ document.addEventListener("DOMContentLoaded", () => {
         const isFinal = i === path.length - 1;
 
         const element = createWordElement(item, isNumber, isFinal);
-        pathContainer.appendChild(element);
+        if (pathContainer) {
+          pathContainer.appendChild(element);
+        }
 
         // Show conclusion once we reach the end
         if (isFinal) {
           setTimeout(() => {
-            conclusion.classList.remove("hidden");
-            // Move focus for screen readers
-            if (conclusion && typeof conclusion.focus === "function") {
-              conclusion.focus();
+            if (conclusion) {
+              conclusion.classList.remove("hidden");
+              // Move focus for screen readers
+              if (typeof conclusion.focus === "function") {
+                conclusion.focus();
+              }
             }
           }, 500);
         }
@@ -641,43 +816,94 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function checkWord() {
-    const word = wordInput.value.trim();
+    const word = wordInput ? wordInput.value.trim() : '';
+
+    // Security: Input validation
+    if (!validateInput(word)) {
+      console.warn('Invalid input:', word);
+      // Show user-friendly error
+      if (pathContainer) {
+        pathContainer.textContent = '';
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.style.cssText = 'color: red; padding: 10px; text-align: center;';
+        errorDiv.textContent = 'Please enter a valid word (letters only, max 100 characters).';
+        pathContainer.appendChild(errorDiv);
+      }
+      return;
+    }
 
     if (word.length === 0) {
       return;
     }
 
-    // Reset the display
-    conclusion.classList.add("hidden");
-
-    // Calculate and display the path
-    const path = calculatePath(word);
-    displayPath(path);
-
-    // Update URL and meta if not suppressed (e.g., initial load)
-    if (!suppressPushState) {
-      const newPath = buildWordPath(currentLanguage, word);
-      const newUrl = siteBase + newPath;
-      if (window.location.href !== newUrl) {
-        history.pushState({ word, lang: currentLanguage }, "", newUrl);
+    try {
+      // Reset the display
+      if (conclusion) {
+        conclusion.classList.add("hidden");
       }
-      updateMetaTags(currentLanguage, word);
+
+      // Calculate and display the path - this is the critical operation
+      const path = calculatePath(word);
+      displayPath(path);
+    } catch (e) {
+      console.error('Critical error in word processing:', {
+        error: e,
+        message: e.message,
+        stack: e.stack,
+        currentLanguage: currentLanguage,
+        word: word
+      });
+      if (pathContainer) {
+        pathContainer.textContent = '';
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.style.cssText = 'color: red; padding: 10px; text-align: center;';
+        errorDiv.textContent = 'An error occurred. Please try again.';
+        pathContainer.appendChild(errorDiv);
+      }
+      return; // Don't proceed with URL/meta updates if core processing failed
+    }
+
+    // Handle URL and meta updates separately - these are non-critical supplementary operations
+    if (!suppressPushState) {
+      try {
+        const newPath = buildWordPath(currentLanguage, word);
+        const newUrl = siteBase + newPath;
+        if (window.location.href !== newUrl) {
+          history.pushState({ word, lang: currentLanguage }, "", newUrl);
+        }
+      } catch (e) {
+        // Log but don't show user error for URL update failures
+        console.debug('Non-critical URL update error (ignored):', e.message);
+      }
+
+      try {
+        updateMetaTags(currentLanguage, word);
+      } catch (e) {
+        // Log but don't show user error for meta tag update failures
+        console.debug('Non-critical meta tag update error (ignored):', e.message);
+      }
     }
   }
 
-  // Get a new random example when clicked
+  // Security: Get a new random example when clicked - safe version
   function setupExampleRefresh() {
     const exampleElement = document.querySelector(".example");
     if (exampleElement) {
       exampleElement.addEventListener("click", () => {
-        const exampleHTML = generateRandomExample(currentLanguage);
-        document.getElementById("example").innerHTML = exampleHTML;
+        try {
+          const exampleData = generateRandomExample(currentLanguage);
+          displayExample(exampleData);
 
-        // Add a small animation to show it's changed
-        exampleElement.classList.add("refreshed");
-        setTimeout(() => {
-          exampleElement.classList.remove("refreshed");
-        }, 500);
+          // Add a small animation to show it's changed
+          exampleElement.classList.add("refreshed");
+          setTimeout(() => {
+            exampleElement.classList.remove("refreshed");
+          }, 500);
+        } catch (e) {
+          console.error('Error refreshing example:', e);
+        }
       });
     }
   }
@@ -943,17 +1169,17 @@ document.addEventListener("DOMContentLoaded", () => {
       let word = "";
       if (pp.length >= 2 && SUPPORTED_LANGS.has(pp[0])) {
         lang = pp[0];
-        word = decodeURIComponent(pp[1]);
+        word = safeDecodeURIComponent(pp[1]);
       } else if (pp.length >= 1) {
-        word = decodeURIComponent(pp[0]);
+        word = safeDecodeURIComponent(pp[0]);
         lang = "en";
       }
-      if (languageData[lang]) {
+      if (languageData[lang] && word) {
         setLanguage(lang);
-      }
-      if (word) {
         suppressPushState = true;
-        wordInput.value = word;
+        if (wordInput) {
+          wordInput.value = word;
+        }
         updateMetaTags(lang, word);
         checkWord();
         suppressPushState = false;
@@ -1002,10 +1228,19 @@ document.addEventListener("DOMContentLoaded", () => {
       canonicalLink.setAttribute("href", canonicalUrl);
     }
 
-    // Update hreflang alternates
+    // Update hreflang alternates - safely remove existing ones
     document
       .querySelectorAll('link[rel="alternate"]')
-      .forEach((el) => el.parentNode.removeChild(el));
+      .forEach((el) => {
+        try {
+          if (el && el.parentNode) {
+            el.parentNode.removeChild(el);
+          }
+        } catch (e) {
+          // Ignore harmless DOM removal errors
+          console.debug('Harmless DOM removal error (ignored):', e.message);
+        }
+      });
     ["en", "nl", "de"].forEach((code) => {
       const link = document.createElement("link");
       link.setAttribute("rel", "alternate");

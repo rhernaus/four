@@ -23,6 +23,21 @@
       media="(prefers-color-scheme: dark)"
     />
 
+    <!-- Content Security Policy for XSS protection -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self';
+               script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline';
+               style-src 'self' https://fonts.googleapis.com 'unsafe-inline';
+               font-src 'self' https://fonts.gstatic.com;
+               connect-src 'self';
+               img-src 'self' data:;
+               object-src 'none';
+               base-uri 'self';
+               form-action 'self';
+               frame-ancestors 'none';"
+    />
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://rhernaus.github.io/four/" />
@@ -63,12 +78,43 @@
     <link rel="manifest" href="manifest.webmanifest" />
 
     <link rel="stylesheet" href="styles.css" />
+    <!-- Security: Google Fonts with fallback handling -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
       rel="stylesheet"
+      onerror="console.warn('Google Fonts failed to load. Using fallback fonts.');"
     />
+
+    <!-- Security: Fallback font styles in case Google Fonts fail -->
+    <style>
+      /* Fallback font stack if Google Fonts fail to load */
+      @font-face {
+        font-family: 'Poppins-Fallback';
+        src: local('Arial'), local('Helvetica'), local('sans-serif');
+        font-weight: 300;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Poppins-Fallback';
+        src: local('Arial'), local('Helvetica'), local('sans-serif');
+        font-weight: 400;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Poppins-Fallback';
+        src: local('Arial'), local('Helvetica'), local('sans-serif');
+        font-weight: 600;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Poppins-Fallback';
+        src: local('Arial'), local('Helvetica'), local('sans-serif');
+        font-weight: 700;
+        font-display: swap;
+      }
+    </style>
 
     <!-- Structured Data - JSON-LD -->
     <script type="application/ld+json">
@@ -365,7 +411,27 @@
     <!-- Particles.js for background animation -->
     <div id="particles-js"></div>
 
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <!-- Security: Load Particles.js with fallback handling -->
+    <script>
+      // Security: Add fallback for Particles.js loading failure
+      function loadParticlesWithFallback() {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js';
+        script.onerror = function() {
+          console.warn('Particles.js failed to load from CDN. Continuing without particle effects.');
+          // Set a flag to indicate particles.js failed to load
+          window.particlesJSFailed = true;
+        };
+        script.onload = function() {
+          console.log('Particles.js loaded successfully');
+        };
+        document.head.appendChild(script);
+      }
+
+      // Load particles.js
+      loadParticlesWithFallback();
+    </script>
+
     <script src="script.js"></script>
     <script>
       // Initialize particles.js after page load with accessibility and data-saver gating
@@ -377,64 +443,73 @@
         const saveData = connection && connection.saveData;
 
         function initParticles() {
-          if (!window.particlesJS) return;
-          particlesJS("particles-js", {
-            particles: {
-              number: {
-                value: 40,
-                density: { enable: true, value_area: 800 },
+          // Security: Check if particles.js loaded successfully
+          if (!window.particlesJS || window.particlesJSFailed) {
+            console.log('Particles.js not available - running without particle effects');
+            return;
+          }
+
+          try {
+            particlesJS("particles-js", {
+              particles: {
+                number: {
+                  value: 40,
+                  density: { enable: true, value_area: 800 },
+                },
+                color: { value: "#5d3be8" },
+                shape: {
+                  type: "circle",
+                  stroke: { width: 0, color: "#000000" },
+                  polygon: { nb_sides: 5 },
+                },
+                opacity: {
+                  value: 0.3,
+                  random: false,
+                  anim: { enable: false, speed: 1, opacity_min: 0.1, sync: false },
+                },
+                size: {
+                  value: 3,
+                  random: true,
+                  anim: { enable: false, speed: 40, size_min: 0.1, sync: false },
+                },
+                line_linked: {
+                  enable: true,
+                  distance: 150,
+                  color: "#5d3be8",
+                  opacity: 0.2,
+                  width: 1,
+                },
+                move: {
+                  enable: true,
+                  speed: 2,
+                  direction: "none",
+                  random: false,
+                  straight: false,
+                  out_mode: "out",
+                  bounce: false,
+                  attract: { enable: false, rotateX: 600, rotateY: 1200 },
+                },
               },
-              color: { value: "#5d3be8" },
-              shape: {
-                type: "circle",
-                stroke: { width: 0, color: "#000000" },
-                polygon: { nb_sides: 5 },
+              interactivity: {
+                detect_on: "canvas",
+                events: {
+                  onhover: { enable: true, mode: "grab" },
+                  onclick: { enable: true, mode: "push" },
+                  resize: true,
+                },
+                modes: {
+                  grab: { distance: 140, line_linked: { opacity: 0.5 } },
+                  bubble: { distance: 400, size: 40, duration: 2, opacity: 8, speed: 3 },
+                  repulse: { distance: 200, duration: 0.4 },
+                  push: { particles_nb: 4 },
+                  remove: { particles_nb: 2 },
+                },
               },
-              opacity: {
-                value: 0.3,
-                random: false,
-                anim: { enable: false, speed: 1, opacity_min: 0.1, sync: false },
-              },
-              size: {
-                value: 3,
-                random: true,
-                anim: { enable: false, speed: 40, size_min: 0.1, sync: false },
-              },
-              line_linked: {
-                enable: true,
-                distance: 150,
-                color: "#5d3be8",
-                opacity: 0.2,
-                width: 1,
-              },
-              move: {
-                enable: true,
-                speed: 2,
-                direction: "none",
-                random: false,
-                straight: false,
-                out_mode: "out",
-                bounce: false,
-                attract: { enable: false, rotateX: 600, rotateY: 1200 },
-              },
-            },
-            interactivity: {
-              detect_on: "canvas",
-              events: {
-                onhover: { enable: true, mode: "grab" },
-                onclick: { enable: true, mode: "push" },
-                resize: true,
-              },
-              modes: {
-                grab: { distance: 140, line_linked: { opacity: 0.5 } },
-                bubble: { distance: 400, size: 40, duration: 2, opacity: 8, speed: 3 },
-                repulse: { distance: 200, duration: 0.4 },
-                push: { particles_nb: 4 },
-                remove: { particles_nb: 2 },
-              },
-            },
-            retina_detect: true,
-          });
+              retina_detect: true,
+            });
+          } catch (e) {
+            console.error('Failed to initialize particles.js:', e);
+          }
         }
 
         // Only initialize particles if user hasn't requested reduced motion and isn't in data saver mode

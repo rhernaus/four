@@ -85,3 +85,4 @@ pids/
 
 # Trunk
 .trunk/
+.roo/

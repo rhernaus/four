@@ -4,19 +4,19 @@
 import { calculatePath } from './algorithm.js';
 import { exampleWords, languageData } from './language-data.js';
 import {
-    checkUrlParameters,
-    setupHistoryNavigation,
-    updateBrowserHistory,
-    updateMetaTags
+  checkUrlParameters,
+  setupHistoryNavigation,
+  updateBrowserHistory,
+  updateMetaTags
 } from './router.js';
 import { setupShareButton } from './share-manager.js';
 import {
-    displayPath,
-    setupExampleRefresh,
-    setupLanguageSelector,
-    setupThemeToggle,
-    showError,
-    updateUI
+  displayPath,
+  setupExampleRefresh,
+  setupLanguageSelector,
+  setupThemeToggle,
+  showError,
+  updateUI
 } from './ui-manager.js';
 import { detectLanguage, validateCriticalElements, validateInput } from './utils.js';
 
@@ -58,7 +58,7 @@ class App {
     };
 
     // Validate critical elements
-    const missingElements = validateCriticalElements(this.elements);
+    const missingElements = validateCriticalElements(this.elements, this.currentLanguage);
     if (missingElements.length > 0) {
       return; // Stop execution if critical elements are missing
     }
@@ -183,7 +183,8 @@ class App {
     // Input validation
     if (!validateInput(word)) {
       console.warn('Invalid input:', word);
-      showError('Please enter a valid word (letters only, max 100 characters).');
+      const errorMessage = languageData[this.currentLanguage].ui.errors.invalidInput;
+      showError(errorMessage);
       return;
     }
 
@@ -208,7 +209,8 @@ class App {
         currentLanguage: this.currentLanguage,
         word: word
       });
-      showError('An error occurred. Please try again.');
+      const errorMessage = languageData[this.currentLanguage].ui.errors.generalError;
+      showError(errorMessage);
       return; // Don't proceed with URL/meta updates if core processing failed
     }
 

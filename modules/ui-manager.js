@@ -66,8 +66,8 @@ export function updateUI(lang) {
   const exampleData = generateRandomExample(lang);
   displayExample(exampleData);
 
-  const footerText = document.getElementById("footer-text");
-  if (footerText) footerText.textContent = data.ui.footer;
+  // Note: footer-text element ("Created with 💻 and curiosity") remains static
+  // Main footer content is handled by data-translate attributes
 
   // Clear previous results
   const pathContainer = document.getElementById("pathContainer");
@@ -95,6 +95,64 @@ export function updateUI(lang) {
     const span = copySuccess.querySelector("span");
     if (span) span.textContent = data.ui.copiedMessage;
   }
+
+  // Update accessibility labels
+  updateAccessibilityLabels(data);
+
+  // Update translatable content
+  updateTranslatableContent(data);
+}
+
+/**
+ * Updates aria-label attributes based on data-translate-aria-label attributes
+ * @param {Object} data - Language data object
+ */
+function updateAccessibilityLabels(data) {
+  // Find all elements with data-translate-aria-label attributes
+  const elementsWithAriaLabels = document.querySelectorAll('[data-translate-aria-label]');
+
+  elementsWithAriaLabels.forEach(element => {
+    const translationKey = element.getAttribute('data-translate-aria-label');
+    if (translationKey) {
+      // Support nested object notation (e.g., 'accessibility.toggleTheme')
+      const translatedText = getNestedProperty(data, translationKey);
+      if (translatedText) {
+        element.setAttribute('aria-label', translatedText);
+      }
+    }
+  });
+}
+
+/**
+ * Updates textContent for elements with data-translate attributes
+ * @param {Object} data - Language data object
+ */
+function updateTranslatableContent(data) {
+  // Find all elements with data-translate attributes
+  const elementsWithTranslate = document.querySelectorAll('[data-translate]');
+
+  elementsWithTranslate.forEach(element => {
+    const translationKey = element.getAttribute('data-translate');
+    if (translationKey) {
+      // Support nested object notation (e.g., 'footer.heading')
+      const translatedText = getNestedProperty(data, translationKey);
+      if (translatedText) {
+        element.textContent = translatedText;
+      }
+    }
+  });
+}
+
+/**
+ * Gets a nested property from an object using dot notation
+ * @param {Object} obj - The object to search in
+ * @param {string} path - The path to the property (e.g., 'ui.accessibility.toggleTheme')
+ * @returns {string|undefined} The property value or undefined if not found
+ */
+function getNestedProperty(obj, path) {
+  return path.split('.').reduce((current, key) => {
+    return current && current[key] !== undefined ? current[key] : undefined;
+  }, obj);
 }
 
 /**

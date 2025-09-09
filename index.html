@@ -138,7 +138,7 @@
       <header>
         <div class="top-controls">
           <div class="language-selector">
-            <div id="currentLanguage" class="language-button">
+            <div id="currentLanguage" class="language-button" data-translate-aria-label="accessibility.languageSelect">
               <span id="languageDisplay">English</span>
               <span class="dropdown-arrow">▼</span>
             </div>
@@ -153,7 +153,7 @@
             id="themeToggle"
             class="theme-toggle"
             type="button"
-            aria-label="Toggle dark mode"
+            data-translate-aria-label="accessibility.toggleTheme"
             aria-pressed="false"
           >
             <svg
@@ -211,6 +211,7 @@
             enterkeyhint="go"
             spellcheck="false"
             autocapitalize="off"
+            data-translate-aria-label="accessibility.enterWord"
           />
           <button id="checkButton" type="button">Check</button>
           <button id="suggestButton" class="suggest-button" type="button">
@@ -297,7 +298,7 @@
               id="closeShareDialog"
               class="close-button"
               type="button"
-              aria-label="Close share dialog"
+              data-translate-aria-label="accessibility.closeShare"
             >
               ×
             </button>
@@ -391,14 +392,14 @@
       <footer>
         <p id="footer-text">Created with 💻 and curiosity</p>
         <div class="seo-footer">
-          <h2>The Four Number Sequence</h2>
-          <p>
+          <h2 data-translate="ui.footer.heading">The Four Number Sequence</h2>
+          <p data-translate="ui.footer.description1">
             The "Everything is Four" phenomenon is a fascinating mathematical
             curiosity based on word lengths. No matter what word you start with,
             counting its letters and repeating the process will always lead to
             the word "four" (which has 4 letters) creating a stable loop.
           </p>
-          <p>
+          <p data-translate="ui.footer.description2">
             This pattern works in multiple languages where the word for "four"
             contains exactly 4 letters: English (four), Dutch (vier), German
             (vier), and others. Try different words in different languages to

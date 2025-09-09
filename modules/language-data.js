@@ -132,12 +132,27 @@ export const languageData = {
       step3: "Schrijf dat nummer uit als een woord",
       step4: 'Herhaal stappen 2-3 totdat je "vier" bereikt',
       example: "", // Will be generated dynamically
-      footer: "Aangedreven door nieuwsgierigheid",
       shareButton: "Delen",
       shareDialogTitle: "Deel deze ontdekking",
       shareDialogText: "Deel deze link met anderen:",
       copyButton: "Kopiëren",
       copiedMessage: "Gekopieerd naar klembord!",
+      errors: {
+        invalidInput: "Voer een geldig woord in (alleen letters, maximaal 100 tekens).",
+        generalError: "Er is een fout opgetreden. Probeer het opnieuw.",
+        loadError: "Applicatiefout: Sommige pagina-elementen konden niet worden geladen. Ververs de pagina."
+      },
+      accessibility: {
+        toggleTheme: "Donkere modus schakelen",
+        closeShare: "Deel dialoog sluiten",
+        enterWord: "Voer een woord in",
+        languageSelect: "Selecteer taal"
+      },
+      footer: {
+        heading: "De Vier Nummer Reeks",
+        description1: "Het \"Alles is Vier\" fenomeen is een fascinerende wiskundige curiositeit gebaseerd op woordlengtes. Ongeacht met welk woord je begint, het tellen van de letters en het herhalen van het proces leidt altijd tot het woord \"vier\" (dat 4 letters heeft) wat een stabiele lus creëert.",
+        description2: "Dit patroon werkt in meerdere talen waar het woord voor \"vier\" precies 4 letters bevat: Engels (four), Nederlands (vier), Duits (vier), en anderen. Probeer verschillende woorden in verschillende talen om te zien hoe ze allemaal convergeren naar vier!"
+      }
     },
   },
   en: {
@@ -188,12 +203,27 @@ export const languageData = {
       step3: "Write out that number as a word",
       step4: 'Repeat steps 2-3 until you reach "four"',
       example: "", // Will be generated dynamically
-      footer: "Powered by curiosity",
       shareButton: "Share",
       shareDialogTitle: "Share this discovery",
       shareDialogText: "Share this link with others:",
       copyButton: "Copy",
       copiedMessage: "Copied to clipboard!",
+      errors: {
+        invalidInput: "Please enter a valid word (letters only, max 100 characters).",
+        generalError: "An error occurred. Please try again.",
+        loadError: "Application error: Some page elements failed to load. Please refresh the page."
+      },
+      accessibility: {
+        toggleTheme: "Toggle dark mode",
+        closeShare: "Close share dialog",
+        enterWord: "Enter a word",
+        languageSelect: "Select language"
+      },
+      footer: {
+        heading: "The Four Number Sequence",
+        description1: "The \"Everything is Four\" phenomenon is a fascinating mathematical curiosity based on word lengths. No matter what word you start with, counting its letters and repeating the process will always lead to the word \"four\" (which has 4 letters) creating a stable loop.",
+        description2: "This pattern works in multiple languages where the word for \"four\" contains exactly 4 letters: English (four), Dutch (vier), German (vier), and others. Try different words in different languages to see how they all converge to four!"
+      }
     },
   },
   de: {
@@ -245,12 +275,27 @@ export const languageData = {
       step3: "Schreiben Sie diese Zahl als Wort aus",
       step4: 'Wiederholen Sie die Schritte 2-3, bis Sie "vier" erreichen',
       example: "", // Will be generated dynamically
-      footer: "Angetrieben von Neugier",
       shareButton: "Teilen",
       shareDialogTitle: "Diese Entdeckung teilen",
       shareDialogText: "Teilen Sie diesen Link mit anderen:",
       copyButton: "Kopieren",
       copiedMessage: "In die Zwischenablage kopiert!",
+      errors: {
+        invalidInput: "Bitte geben Sie ein gültiges Wort ein (nur Buchstaben, maximal 100 Zeichen).",
+        generalError: "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+        loadError: "Anwendungsfehler: Einige Seitenelemente konnten nicht geladen werden. Bitte aktualisieren Sie die Seite."
+      },
+      accessibility: {
+        toggleTheme: "Dunklen Modus umschalten",
+        closeShare: "Teilen-Dialog schließen",
+        enterWord: "Geben Sie ein Wort ein",
+        languageSelect: "Sprache auswählen"
+      },
+      footer: {
+        heading: "Die Vier-Zahlen-Sequenz",
+        description1: "Das \"Alles ist Vier\" Phänomen ist eine faszinierende mathematische Kuriosität basierend auf Wortlängen. Egal mit welchem Wort Sie beginnen, das Zählen der Buchstaben und das Wiederholen des Prozesses führt immer zum Wort \"vier\" (das 4 Buchstaben hat) und erzeugt eine stabile Schleife.",
+        description2: "Dieses Muster funktioniert in mehreren Sprachen, in denen das Wort für \"vier\" genau 4 Buchstaben enthält: Englisch (four), Niederländisch (vier), Deutsch (vier) und andere. Probieren Sie verschiedene Wörter in verschiedenen Sprachen aus, um zu sehen, wie sie alle zu vier konvergieren!"
+      }
     },
   },
 };

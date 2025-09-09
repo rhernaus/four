@@ -1,6 +1,8 @@
 // Utility functions module for the "Everything is Four" application
 // Contains security, validation, and DOM utility functions
 
+import { languageData } from './language-data.js';
+
 /**
  * HTML sanitization function to prevent XSS attacks
  * @param {string} text - Text to sanitize
@@ -76,9 +78,10 @@ export function createArrowSeparator() {
 /**
  * Validates critical DOM elements and shows error if missing
  * @param {Object} elements - Object containing DOM elements to validate
+ * @param {string} language - Current language code for error message translation
  * @returns {Array} Array of missing element names
  */
-export function validateCriticalElements(elements) {
+export function validateCriticalElements(elements, language = 'en') {
   const missingElements = Object.entries(elements)
     .filter(([name, element]) => !element)
     .map(([name]) => name);
@@ -88,9 +91,10 @@ export function validateCriticalElements(elements) {
     // Show user-friendly error if critical elements are missing
     const body = document.body;
     if (body) {
+      const errorMessage = languageData[language].ui.errors.loadError;
       const errorDiv = document.createElement('div');
       errorDiv.style.cssText = 'padding: 20px; margin: 20px; border: 2px solid red; background: #ffe6e6; color: red;';
-      errorDiv.textContent = 'Application error: Some page elements failed to load. Please refresh the page.';
+      errorDiv.textContent = errorMessage;
       body.insertBefore(errorDiv, body.firstChild);
     }
   }
